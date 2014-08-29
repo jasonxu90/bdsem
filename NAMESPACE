@@ -1,0 +1,5 @@
+import(mvtnorm)
+import(Matrix)
+import(deSolve)
+import(numDeriv)
+exportPattern("^[[:alpha:]]+")
