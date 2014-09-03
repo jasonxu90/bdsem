@@ -1289,7 +1289,7 @@ logFFT.patients <- function(betas, t.pat, num.patients, PATIENTDATA, patients.de
     lam <- exp( sum(b.lam*patients.design[,i])); v <- exp( sum(b.v*patients.design[,i])); mu <- exp(sum(b.mu*patients.design[,i]))
     #this takes the subset of the fake data corresponding to patient i
     dat.i <- PATIENTDATA[,which(PATIENTDATA[1,]==i)]
-    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.02) #stores trans matrices for all possible init size for this patient
+    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,t.pat) #stores trans matrices for all possible init size for this patient
     for(j in 1:dim(dat.i)[2]){
       initial <- dat.i[3,j] - dat.i[2,1] + 2  #subtract the init.patient to get the proper index in the tpm list
       n.old <- dat.i[4,j]
@@ -1351,11 +1351,11 @@ ESTEP <- function(betaVec, t.pat, num.patients, PATIENTDATA, patients.design, s1
     
     #generate the transition probabilities and restricted moments for all possible initial sizes of patients
     #all information for the E step is calculated in these functions: this is the expensive part/meat of update
-    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, .01) #stores trans matrices for all possible init size for this patient
-    restrictedBirth.list <- getBirthMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedShift.list <- getShiftMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedDeath.list <- getDeathMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedParticle.list <- getParticleT.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
+    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat) #stores trans matrices for all possible init size for this patient
+    restrictedBirth.list <- getBirthMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedShift.list <- getShiftMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedDeath.list <- getDeathMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedParticle.list <- getParticleT.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
     
     #loop over number of observations associated with patient i
     for(j in 1:dim(dat.i)[2]){
@@ -1412,11 +1412,11 @@ ESTEP.slow <- function(betaVec, t.pat, num.patients, PATIENTDATA, patients.desig
     dat.i <- PATIENTDATA[,which(PATIENTDATA[1,]==i)]
     #generate the transition probabilities and restricted moments for all possible initial sizes of patients
     #all information for the E step is calculated in these functions: this is the expensive part/meat of update
-    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, .01) #stores trans matrices for all possible init size for this patient
-    restrictedBirth.list <- getBirthMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedShift.list <- getShiftMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedDeath.list <- getDeathMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
-    restrictedParticle.list <- getParticleT.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq,.01)
+    tpm.list <- getTrans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat) #stores trans matrices for all possible init size for this patient
+    restrictedBirth.list <- getBirthMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedShift.list <- getShiftMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedDeath.list <- getDeathMeans.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
+    restrictedParticle.list <- getParticleT.initList(t.pat, seq(dat.i[2,1]-1, dat.i[2,1]+1), lam, v, mu, s1.seq, s2.seq, t.pat)
     
     #loop over number of observations associated with patient i
     for(j in 1:dim(dat.i)[2]){
