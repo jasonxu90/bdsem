@@ -1,4 +1,4 @@
-Package: BSDpack
+Package: bdsem
 Type: Package
 Imports: mvtnorm, Matrix, deSolve, numDeriv
 Title: What the package does (short line)
