@@ -88,7 +88,7 @@
 
 Here we demonstrate how to use the software to obtain and verify the accuracy of numerically computed transition probabilities of the BDS process. We walk through an illustration that is an analogous, simplified version of the transition probability comparison experiment in the main paper. 
 
-First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function \texttt{getTrans.timeList}. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, \texttt{s2.seq}, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
+First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function `getTrans.timeList`. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, `s2.seq`, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
 
  
 \begin{knitrout}
@@ -138,7 +138,8 @@ transProbs.FM <- \hlkwd{getTrans.FreqMon}(tList, 0.02, 0.008, 0.015, 10)
 \end{knitrout}
 
 
-It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper.
+It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper. Note that the Monte Carlo results may not be very accurate without increasing \texttt{nSims} in our example to an adequately large number.
+
 
 
 
@@ -157,6 +158,67 @@ It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} 
 
 \end{knitrout}
 
+
+
+\section{Inference in simple BDS model}
+
+This section demonstrates how to infer birth, shift, and death rates that do not depend on covariates using our method. The code below takes some time to run.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{###### Compare performance of FFT vs FM results####### list of time interval lengths and}
+\hlcom{###### list of possible initial sizes}
+tList <- \hlkwd{c}(0.2, 0.4, 0.6)
+initList <- \hlkwd{c}(1:15)
+\hlcom{# lam = .0188; v = .00268; mu = .0147}
+lam = 0.06
+v = 0.02
+mu = 0.11
+trueParam <- \hlkwd{c}(lam, v, mu)  \hlcom{#simple rates, no covariates}
+N = 200
+
+\hlcom{# the following tells you what grid to evaluate trans probabilities over}
+gridLength = 16
+s1.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
+s2.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
+
+FM.rep = 10  \hlcom{#in practice increase reps}
+\hlkwd{system.time}(FMruns <- \hlkwd{FM.replicate}(FM.rep, N, tList, lam, v, mu, initList, trueParam))
+
+\hlcom{# each list entry is a matrix corresponding to a dt interval length for these matrices,}
+\hlcom{# each row will correspond to a parameter estimate, each column to one of the}
+\hlcom{# replications}
+FM.params <- \hlkwd{vector}(\hlstr{"list"}, \hlkwd{length}(tList))
+
+\hlcom{# each row corresponds to a dt, each column corresponds to a parameter coverage}
+FM.coverage <- \hlkwd{mat.or.vec}(3, 3)
+
+\hlcom{# fill the previous two lists/matrices}
+\hlkwd{for} (i in 1:\hlkwd{length}(tList)) \{
+    FM.params[[i]] <- \hlkwd{sapply}(FMruns[i, ], getEst)
+    coverMatrix <- \hlkwd{sapply}(FMruns[i, ], getCover, trueParam = trueParam)
+    FM.coverage[i, ] <- \hlkwd{apply}(coverMatrix, 1, mean)
+\}
+
+\hlcom{##### repeat for FFT method:}
+FFT.rep = 10  \hlcom{#in practice increase reps}
+\hlkwd{system.time}(FFTruns <- \hlkwd{FFT.replicate}(FFT.rep, N, tList, lam, v, mu, initList, trueParam, s1.seq, 
+    s2.seq))
+\hlcom{# each 'column' of the result FFTruns corresponds to one of these lists each row}
+\hlcom{# corresponds to a dt in tList}
+
+FFT.params <- \hlkwd{vector}(\hlstr{"list"}, \hlkwd{length}(tList))
+FFT.coverage <- \hlkwd{mat.or.vec}(3, 3)
+
+\hlcom{# fill the previous two lists/matrices}
+\hlkwd{for} (i in 1:\hlkwd{length}(tList)) \{
+    FFT.params[[i]] <- \hlkwd{sapply}(FFTruns[i, ], getEst)
+    coverMatrix <- \hlkwd{sapply}(FFTruns[i, ], getCover, trueParam = trueParam)
+    FFT.coverage[i, ] <- \hlkwd{apply}(coverMatrix, 1, mean)
+\}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 
 \end{document}
