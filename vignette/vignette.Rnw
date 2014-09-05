@@ -1,0 +1,178 @@
+%% LyX 2.0.3 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass{article}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+ 
+
+\newcommand{\mb}{\mathbf}
+\newcommand{\ind}{\mathbbm{1}}
+\newcommand{\indfun}[1]{\ensuremath{\mb{1}_{\{#1\}}}}
+ 
+\begin{document}
+<<setup, include=FALSE, cache=FALSE>>=
+library(knitr)
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', fig.show='hold')
+options(formatR.arrow=TRUE,width=90)
+@
+
+
+% \begin{center}
+%   \textbf{\large BDSEM Package: inferring MLE rates of discretely observed birth-death-shift processes}
+% \end{center}
+\title{BDSEM Package: inferring MLE rates of discretely observed birth-death-shift processes}
+
+\author{Jason Xu}
+
+\maketitle
+
+\section{Transition probabilities of birth-death-shift process}
+
+Here we demonstrate how to use the software to obtain and verify the accuracy of numerically computed transition probabilities of the BDS process. We walk through an illustration that is an analogous, simplified version of the transition probability comparison experiment in the main paper. 
+
+First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function \texttt{getTrans.timeList}. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, \texttt{s2.seq}, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
+
+ 
+<<>>=
+library(bdsem)
+gridLength = 16
+s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
+s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
+tList <- c(.5,2,6,10)
+transProbs <- getTrans.timeList(tList, 
+                                .0188, .00268, .0147, 10, s1.seq, s2.seq, .5)
+
+@
+The results are stored in \texttt{transProbs}, a list of matrices, where each entry contains a matrix corresponds to a time interval length from \texttt{tList}. The $k,l$ entry of the matrix is then the transition probability $p_{(i,0),(k-1,l-1)(t)}$
+
+For instance, in our example the transition probability $p_{(10,0),(8,0)}(6)$ is contained in
+<<>>=
+transProbs[[3]][9,1]
+@
+since $t=6$ is the fourth entry in \texttt{tList}.
+
+Next, we can check these probabilities by simulating from the BDS process. We simulate \texttt{nSims} realizations of the process for length $t$, for all values $t$ in \texttt{tList}. Each simulation begins at $\mb{X}(0) = (i,0)$, and transition probabilities $p_{(i,0),(k,l)(t)}$ are computed by empirically computing the proportion of times the simulation ends with $\mb{X}(t) = (k,l)$. 
+
+These empirical transition probabilities via simulation serve as a ground truth benchmark for comparison, and are computed using \texttt{transProbs.MC}. The results are stored in the same format as returned by \texttt{getTrans.timeList}
+
+To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method: note this next section will take a while, even with a relatively small number of simulations
+<<>>=
+#nSims = 5000   #increase number of simulations for more precise estimates: omitted for speed
+nSims = 5
+transProbs.MC <- getTrans.MC(nSims,tList,.02,.008,.015,10)
+transProbs.FM <- getTrans.FreqMon(tList, .02,.008,.015,10)
+@
+
+It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper. Note that the Monte Carlo results may not be very accurate without increasing \texttt{nSims} in our example to an adequately large number.
+
+
+<<echo=FALSE>>=
+noEvent <- birthProbs <- shiftProbs <- deathProbs <- c()
+sd.nothing <- sd.birth <- sd.shift <- sd.death <- c()
+
+for(i in 1:length(tList)){
+  death <- rbind( transProbs.MC[[i]][10,1], transProbs[[i]][10,1], transProbs.FM[[i]][1,1])
+  shift <- rbind( transProbs.MC[[i]][10,2], transProbs[[i]][10,2], transProbs.FM[[i]][1,2])
+  birth <- rbind( transProbs.MC[[i]][11,2], transProbs[[i]][11,2], transProbs.FM[[i]][2,2])
+  nothing <- rbind( transProbs.MC[[i]][11,1], transProbs[[i]][11,1], transProbs.FM[[i]][2,1])
+  
+  sd.death <- c(sd.death, sqrt(death[1]*(1 - death[1])/nSims) )
+  sd.shift <- c(sd.shift, sqrt(shift[1]*(1 - shift[1])/nSims) )
+  sd.birth <- c(sd.birth, sqrt(birth[1]*(1 - birth[1])/nSims) )
+  sd.nothing <- c(sd.nothing, sqrt(nothing[1]*(1 - nothing[1])/nSims) )
+  
+  deathProbs <- cbind(deathProbs, death)
+  shiftProbs <- cbind(shiftProbs, shift)
+  birthProbs <- cbind(birthProbs, birth)
+  noEvent <- cbind(noEvent, nothing)
+}
+@
+
+<<transFigure, echo=FALSE>>=
+###PLOTTING TRANSITION RESULTS
+library(plotrix)
+par(mfrow=c(2,2))
+
+plot(tList, birthProbs[3,], pch = 3, ylim = c(0,.5), col = 'purple', ylab = "Transition Probability", xlab = "Observation Interval Length", main = "Probability of One Birth")
+plotCI(tList, birthProbs[1,], pch = 16, col = 4, ui=birthProbs[1,]+1.96*sd.birth, li=birthProbs[1,]-1.96*sd.birth, add = TRUE)
+points(tList, birthProbs[2,], pch = 17, col=2)
+
+plot(tList, deathProbs[3,], pch = 3, col = 'purple', ylim = c(0,.45), ylab = "Transition Probability", xlab = "Observation Interval Length", main = "Probability of One Death")
+plotCI(tList, deathProbs[1,], pch = 16, col = 4, ui=deathProbs[1,]+1.96*sd.death, li=deathProbs[1,]-1.96*sd.death, add = TRUE)
+points(tList, deathProbs[2,], pch = 17, col=2)
+
+plot(tList, shiftProbs[3,], pch = 3, col = 'purple', ylim = c(0,.23), ylab = "Transition Probability", xlab = "Observation Interval Length", main = "Probability of One Shift")
+plotCI(tList, shiftProbs[1,], pch = 16, col = 4, ui=shiftProbs[1,]+1.96*sd.shift, li=shiftProbs[1,]-1.96*sd.shift, add = TRUE)
+points(tList, shiftProbs[2,], pch = 17, col=2)
+
+plot(tList, noEvent[3,], pch = 3, col = 'purple', ylim = c(0,.85), ylab = "Transition Probability", xlab = "Observation Interval Length", main = "Probability of No Event")
+plotCI(tList, noEvent[1,], pch = 16, col = 4, ui=noEvent[1,]+1.96*sd.nothing, li=noEvent[1,]-1.96*sd.nothing, add = TRUE)
+points(tList, noEvent[2,], pch = 17, col=2)
+
+legend("topright",legend=c("MC simulation","Frequent Monitoring", "Generating Function"), cex=.9, bty="o", col=c(4,'purple',2), pch = c(16,3,17))
+@
+
+
+\section{Inference in simple BDS model}
+
+This section demonstrates how to infer birth, shift, and death rates that do not depend on covariates using our method. The code below takes some time to run.
+<<eval=FALSE>>=
+######Compare performance of FFT vs FM results#######
+#list of time interval lengths and list of possible initial sizes
+tList <- c(.2,.4,.6); initList <- c(1:15)
+#lam = .0188; v = .00268; mu = .0147
+lam = .06; v = .02; mu = .11
+trueParam <- c(lam,v,mu) #simple rates, no covariates
+N = 200
+
+#the following tells you what grid to evaluate trans probabilities over
+gridLength = 16
+s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
+s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
+
+FM.rep = 10   #in practice increase reps
+system.time(FMruns <- FM.replicate(FM.rep,N,tList,lam,v,mu,initList, trueParam))
+
+#each list entry is a matrix corresponding to a dt interval length
+#for these matrices, each row will correspond to a parameter estimate, each column to one of the replications
+FM.params <- vector("list",length(tList))
+
+#each row corresponds to a dt, each column corresponds to a parameter coverage 
+FM.coverage <- mat.or.vec(3,3)
+
+#fill the previous two lists/matrices
+for(i in 1:length(tList)){
+  FM.params[[i]] <- sapply(FMruns[i,], getEst)
+  coverMatrix <- sapply(FMruns[i,], getCover, trueParam = trueParam)
+  FM.coverage[i,] <- apply(coverMatrix, 1, mean)
+}
+
+#####repeat for FFT method:
+FFT.rep = 10    #in practice increase reps
+system.time(FFTruns <- FFT.replicate(FFT.rep, N, tList, lam, v, mu, initList, trueParam, s1.seq, s2.seq))
+#each "column" of the result FFTruns corresponds to one of these lists
+#each row corresponds to a dt in tList
+
+FFT.params <- vector("list",length(tList)); FFT.coverage <- mat.or.vec(3,3)
+
+#fill the previous two lists/matrices
+for(i in 1:length(tList)){
+  FFT.params[[i]] <- sapply(FFTruns[i,], getEst)
+  coverMatrix <- sapply(FFTruns[i,], getCover, trueParam = trueParam)
+  FFT.coverage[i,] <- apply(coverMatrix, 1, mean)
+}
+@
+
+\end{document}

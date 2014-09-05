@@ -566,7 +566,7 @@ getTrans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt){
     grid.de <- makeGrid.trans(time = tList[i], dt, s1.seq, s2.seq, lam,v,mu)
     grid.de <- grid.de^initNum
     fourier.de <- fft(grid.de)/length(grid.de)
-    tpm.list[[i]] <- fourier.de[1:(initNum+1),1:(initNum+1)]
+    tpm.list[[i]] <- Re(fourier.de)
   }
   return(tpm.list)
 }
@@ -601,7 +601,7 @@ getParticleT.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt)
     grid <- makeGrid.particleT.r0(time = tList[i], dt, s1.seq, s2.seq, lam,v,mu)
     grid.de <- initNum*grid.partial*grid^(initNum-1)
     fourier.de <- fft(grid.de)/length(grid.de)
-    tpm.list[[i]] <- round(fourier.de[1:(initNum+1),1:(initNum+1)],6)
+    tpm.list[[i]] <- Re(fourier.de)
   }
   return(tpm.list)
 }
@@ -637,7 +637,7 @@ getDeathMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
     grid <- makeGrid.death.r1(time = tList[i], dt, s1.seq, s2.seq, lam,v,mu)
     grid.de <- initNum*grid.partial*grid^(initNum-1)
     fourier.de <- fft(grid.de)/length(grid.de)
-    tpm.list[[i]] <- round(fourier.de[1:(initNum+1),1:(initNum+1)],6)
+    tpm.list[[i]] <- Re(fourier.de)
   }
   return(tpm.list)
 }
@@ -673,7 +673,7 @@ getShiftMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
     grid <- makeGrid.shift.r1(time = tList[i], dt, s1.seq, s2.seq, lam,v,mu)
     grid.de <- initNum*grid.partial*grid^(initNum-1)
     fourier.de <- fft(grid.de)/length(grid.de)
-    tpm.list[[i]] <- round(fourier.de[1:(initNum+1),1:(initNum+1)],6)
+    tpm.list[[i]] <- Re(fourier.de)
   }
   return(tpm.list)
 }
@@ -709,7 +709,7 @@ getBirthMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
     grid <- makeGrid.birth.r1(time = tList[i], dt, s1.seq, s2.seq, lam,v,mu)
     grid.de <- initNum*grid.partial*grid^(initNum-1)
     fourier.de <- fft(grid.de)/length(grid.de)
-    tpm.list[[i]] <- round(fourier.de[1:(initNum+1),1:(initNum+1)],6)
+    tpm.list[[i]] <- Re(fourier.de)
   }
   return(tpm.list)
 }

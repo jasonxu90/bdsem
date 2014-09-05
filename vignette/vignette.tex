@@ -1,0 +1,162 @@
+%% LyX 2.0.3 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+ 
+
+\newcommand{\mb}{\mathbf}
+\newcommand{\ind}{\mathbbm{1}}
+\newcommand{\indfun}[1]{\ensuremath{\mb{1}_{\{#1\}}}}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+ 
+\begin{document}
+
+
+
+
+% \begin{center}
+%   \textbf{\large BDSEM Package: inferring MLE rates of discretely observed birth-death-shift processes}
+% \end{center}
+\title{BDSEM Package: inferring MLE rates of discretely observed birth-death-shift processes}
+
+\author{Jason Xu}
+
+\maketitle
+
+\section{Transition probabilities of birth-death-shift process}
+
+Here we demonstrate how to use the software to obtain and verify the accuracy of numerically computed transition probabilities of the BDS process. We walk through an illustration that is an analogous, simplified version of the transition probability comparison experiment in the main paper. 
+
+First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function \texttt{getTrans.timeList}. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, \texttt{s2.seq}, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
+
+ 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}(bdsem)
+gridLength = 16
+s1.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
+s2.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
+tList <- \hlkwd{c}(0.5, 2, 6, 10)
+transProbs <- \hlkwd{getTrans.timeList}(tList, 0.0188, 0.00268, 0.0147, 10, s1.seq, s2.seq, 0.5)
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+The results are stored in \texttt{transProbs}, a list of matrices, where each entry contains a matrix corresponds to a time interval length from \texttt{tList}. The $k,l$ entry of the matrix is then the transition probability $p_{(i,0),(k-1,l-1)(t)}$
+
+For instance, in our example the transition probability $p_{(10,0),(8,0)}(6)$ is contained in
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+transProbs[[3]][9, 1]
+\end{alltt}
+\begin{verbatim}
+## [1] 0.05284
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+since $t=6$ is the fourth entry in \texttt{tList}.
+
+Next, we can check these probabilities by simulating from the BDS process. We simulate \texttt{nSims} realizations of the process for length $t$, for all values $t$ in \texttt{tList}. Each simulation begins at $\mb{X}(0) = (i,0)$, and transition probabilities $p_{(i,0),(k,l)(t)}$ are computed by empirically computing the proportion of times the simulation ends with $\mb{X}(t) = (k,l)$. 
+
+These empirical transition probabilities via simulation serve as a ground truth benchmark for comparison, and are computed using \texttt{transProbs.MC}. The results are stored in the same format as returned by \texttt{getTrans.timeList}
+
+To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method: note this next section will take a while, even with a relatively small number of simulations
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# nSims = 5000 #increase number of simulations for more precise estimates: omitted for}
+\hlcom{# speed}
+nSims = 5
+transProbs.MC <- \hlkwd{getTrans.MC}(nSims, tList, 0.02, 0.008, 0.015, 10)
+transProbs.FM <- \hlkwd{getTrans.FreqMon}(tList, 0.02, 0.008, 0.015, 10)
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper.
+
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: package 'plotrix' was built under R version 2.15.3}}\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/minimal-transFigure} 
+
+}
+
+
+
+\end{knitrout}
+
+
+
+\end{document}
