@@ -1,6 +1,6 @@
 %% LyX 2.0.3 created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing.
-\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -57,6 +57,7 @@
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
 \usepackage{url}
+\usepackage{bm}
 \usepackage[unicode=true,pdfusetitle,
  bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
  breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
@@ -74,7 +75,6 @@
 
 
 
-
 % \begin{center}
 %   \textbf{\large BDSEM Package: inferring MLE rates of discretely observed birth-death-shift processes}
 % \end{center}
@@ -88,7 +88,7 @@
 
 Here we demonstrate how to use the software to obtain and verify the accuracy of numerically computed transition probabilities of the BDS process. We walk through an illustration that is an analogous, simplified version of the transition probability comparison experiment in the main paper. 
 
-First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function `getTrans.timeList`. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, `s2.seq`, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
+First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as inputs. Then given an initial population size $i$, corresponding to an initial state of the process $\mb{X}(0) = (i,0)$, we want to compute the transition probability $p_{(i,0),(k,l)(t)}$ accurately for any time interval length $t$. We do this for a list of different interval lengths using the function \texttt{getTrans.timeList}. This function implements our generating function approach to computing transition probabilities, and in addition to the arguments already mentioned, this requires inputs \texttt{s1.seq}, \texttt{s2.seq}, vectors of imaginary numbers evenly spaced around the unit circle. Their length determines the maximum $k,l$ values for which transition probabilities are computed; accuracy improves with finer sequences, and their length defined by \texttt{gridLength} below should be a power of $2$ for best results.
 
  
 \begin{knitrout}
@@ -96,10 +96,11 @@ First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as i
 \begin{alltt}
 \hlkwd{library}(bdsem)
 gridLength = 16
-s1.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
-s2.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
-tList <- \hlkwd{c}(0.5, 2, 6, 10)
-transProbs <- \hlkwd{getTrans.timeList}(tList, 0.0188, 0.00268, 0.0147, 10, s1.seq, s2.seq, 0.5)
+s1.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
+s2.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
+tList <- \hlkwd{c}(.5,2,6,10)
+transProbs <- \hlkwd{getTrans.timeList}(tList, 
+                                .0188, .00268, .0147, 10, s1.seq, s2.seq, .5)
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -122,7 +123,7 @@ since $t=6$ is the fourth entry in \texttt{tList}.
 
 Next, we can check these probabilities by simulating from the BDS process. We simulate \texttt{nSims} realizations of the process for length $t$, for all values $t$ in \texttt{tList}. Each simulation begins at $\mb{X}(0) = (i,0)$, and transition probabilities $p_{(i,0),(k,l)(t)}$ are computed by empirically computing the proportion of times the simulation ends with $\mb{X}(t) = (k,l)$. 
 
-These empirical transition probabilities via simulation serve as a ground truth benchmark for comparison, and are computed using \texttt{transProbs.MC}. The results are stored in the same format as returned by \texttt{getTrans.timeList}
+These empirical transition probabilities via simulation serve as a ground truth benchmark for comparison, and are computed using \texttt{tp.MC}. The results are stored in the same format as returned by \texttt{getTrans.timeList}
 
 To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method: note this next section will take a while, even with a relatively small number of simulations
 \begin{knitrout}
@@ -130,18 +131,43 @@ To compare with previous methods, we can also compute the probabilities of one b
 \begin{alltt}
 \hlcom{# nSims = 5000 #increase number of simulations for more precise estimates: omitted for}
 \hlcom{# speed}
-nSims = 5
-transProbs.MC <- \hlkwd{getTrans.MC}(nSims, tList, 0.02, 0.008, 0.015, 10)
-transProbs.FM <- \hlkwd{getTrans.FreqMon}(tList, 0.02, 0.008, 0.015, 10)
+nSims = 3
+tp.MC <- \hlkwd{getTrans.MC}(nSims, tList, 0.02, 0.008, 0.015, 10)
+tp.FM <- \hlkwd{getTrans.FreqMon}(tList, 0.02, 0.008, 0.015, 10)
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 
-It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper. Note that the Monte Carlo results may not be very accurate without increasing \texttt{nSims} in our example to an adequately large number.
+It is easy to compare entries of \texttt{transProbs} and \texttt{tp.MC} to verify that our method calculates accurate values. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed figure in the main paper. Note that the Monte Carlo results may not be very accurate without increasing \texttt{nSims} in our example to an adequately large number.
 
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#store results in more intuitive formats}
+noEvent <- birthProbs <- shiftProbs <- deathProbs <- \hlkwd{c}()
+sd.nothing <- sd.birth <- sd.shift <- sd.death <- \hlkwd{c}()
 
+\hlkwd{for}(i in 1:\hlkwd{length}(tList))\{
+  death <- \hlkwd{rbind}( tp.MC[[i]][10,1], transProbs[[i]][10,1], tp.FM[[i]][1,1])
+  shift <- \hlkwd{rbind}( tp.MC[[i]][10,2], transProbs[[i]][10,2], tp.FM[[i]][1,2])
+  birth <- \hlkwd{rbind}( tp.MC[[i]][11,2], transProbs[[i]][11,2], tp.FM[[i]][2,2])
+  nothing <- \hlkwd{rbind}( tp.MC[[i]][11,1], transProbs[[i]][11,1], tp.FM[[i]][2,1])
+  
+  sd.death <- \hlkwd{c}(sd.death, \hlkwd{sqrt}(death[1]*(1 - death[1])/nSims) )
+  sd.shift <- \hlkwd{c}(sd.shift, \hlkwd{sqrt}(shift[1]*(1 - shift[1])/nSims) )
+  sd.birth <- \hlkwd{c}(sd.birth, \hlkwd{sqrt}(birth[1]*(1 - birth[1])/nSims) )
+  sd.nothing <- \hlkwd{c}(sd.nothing, \hlkwd{sqrt}(nothing[1]*(1 - nothing[1])/nSims) )
+  
+  deathProbs <- \hlkwd{cbind}(deathProbs, death)
+  shiftProbs <- \hlkwd{cbind}(shiftProbs, shift)
+  birthProbs <- \hlkwd{cbind}(birthProbs, birth)
+  noEvent <- \hlkwd{cbind}(noEvent, nothing)
+\}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 
 \begin{knitrout}
@@ -162,60 +188,289 @@ It is easy to compare entries of \texttt{transProbs} and \texttt{transProbs.MC} 
 
 \section{Inference in simple BDS model}
 
-This section demonstrates how to infer birth, shift, and death rates that do not depend on covariates using our method. The code below takes some time to run.
+This section demonstrates how to infer birth, shift, and death rates that do not depend on covariates using our method, and can be used to recreate the second simulation study (top panel, Figure 3 of main paper) comparing inference when the likelihood is built up using transition probabilities computed using our method to the setting where frequent monitoring transition probabilities are used. 
+
+%The corresponding R code takes some time to run, and is not evaluated while compiling the vignette: you should verify that it works by copying and running the code. 
+As discussed in the paper, we generate a partially observed dataset and infer rates using both methods. We simulate from the BSD process with parameters $\lambda = .07, \mu = .12, \nu = .2$ and record 200 discretely observed states of the process evenly spaced $dt$ time units apart. Each simulated interval begins with an initial population size drawn uniformly between $1$ and $15$, and this data generating process is repeated three times, producing three datasets corresponding to spacings $dt = (.2,.4,.6)$. The code below initializes these settings:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{###### Compare performance of FFT vs FM results####### list of time interval lengths and}
-\hlcom{###### list of possible initial sizes}
+\hlcom{# list of time interval lengths and list of possible initial sizes}
 tList <- \hlkwd{c}(0.2, 0.4, 0.6)
 initList <- \hlkwd{c}(1:15)
-\hlcom{# lam = .0188; v = .00268; mu = .0147}
-lam = 0.06
+lam = 0.07
 v = 0.02
 mu = 0.11
 trueParam <- \hlkwd{c}(lam, v, mu)  \hlcom{#simple rates, no covariates}
-N = 200
+N = 200  \hlcom{#number of intervals to generate per dataset}
 
-\hlcom{# the following tells you what grid to evaluate trans probabilities over}
+\hlcom{# similarly to previous example, we need to specify the grid of inputs}
 gridLength = 16
 s1.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
 s2.seq <- \hlkwd{exp}(2 * pi * (0+1i) * \hlkwd{seq}(from = 0, to = (gridLength - 1))/gridLength)
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-FM.rep = 10  \hlcom{#in practice increase reps}
-\hlkwd{system.time}(FMruns <- \hlkwd{FM.replicate}(FM.rep, N, tList, lam, v, mu, initList, trueParam))
 
-\hlcom{# each list entry is a matrix corresponding to a dt interval length for these matrices,}
-\hlcom{# each row will correspond to a parameter estimate, each column to one of the}
-\hlcom{# replications}
+The entire process of generating data and MLE inference on the synthetic dataset using our method is then completed using the function \texttt{FFT.replicate}. This function calls \texttt{makedata.simple} to generate the three synthetic datasets, and optimizes the likelihood using \texttt{optim}: because we want to compare directly to the frequent monitoring method, here we perform \textit{generic optimization}.  An example of inference using the EM algorithm follows in the next sections.
+We specify necessary parameters for the algorithm described in the transition probability example above below, as well as the number of repetitions below:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+FFT.rep = 2  \hlcom{#number of repetitions}
+FFTruns <- \hlkwd{FFT.replicate}(FFT.rep, N, tList, 
+                         lam, v, mu, initList, trueParam, s1.seq, s2.seq)
+\hlcom{#the object returned by FFTruns is not intuitive, and the following code stores }
+\hlcom{#parameter estimates and 95% confidence interval coverage in matrices a more}
+\hlcom{#readable format:}
+FFT.params <- \hlkwd{vector}(\hlstr{"list"},\hlkwd{length}(tList))
+FFT.coverage <- \hlkwd{mat.or.vec}(3,3)
+\hlkwd{for}(i in 1:\hlkwd{length}(tList))\{
+  FFT.params[[i]] <- \hlkwd{sapply}(FFTruns[i,], getEst)
+  coverMatrix <- \hlkwd{sapply}(FFTruns[i,], getCover, trueParam = trueParam)
+  FFT.coverage[i,] <- \hlkwd{apply}(coverMatrix, 1, mean)
+\}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+In practice of course we need to increase the number of repetitions to produce reasonable estimates of parameters and coverage.
+Similarly, we may repeat the same steps using the frequent monitoring likelihood by then running the code below:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+FM.rep = 2
+FMruns <- \hlkwd{FM.replicate}(FM.rep, N, tList, lam, v, mu, initList, trueParam)
+
 FM.params <- \hlkwd{vector}(\hlstr{"list"}, \hlkwd{length}(tList))
-
-\hlcom{# each row corresponds to a dt, each column corresponds to a parameter coverage}
-FM.coverage <- \hlkwd{mat.or.vec}(3, 3)
-
-\hlcom{# fill the previous two lists/matrices}
+FM.coverage <- \hlkwd{mat.or.vec}(3, 3)  \hlcom{#each row corresponds to a dt, }
+\hlcom{# each column corresponds to a parameter coverage}
 \hlkwd{for} (i in 1:\hlkwd{length}(tList)) \{
     FM.params[[i]] <- \hlkwd{sapply}(FMruns[i, ], getEst)
     coverMatrix <- \hlkwd{sapply}(FMruns[i, ], getCover, trueParam = trueParam)
     FM.coverage[i, ] <- \hlkwd{apply}(coverMatrix, 1, mean)
 \}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-\hlcom{##### repeat for FFT method:}
-FFT.rep = 10  \hlcom{#in practice increase reps}
-\hlkwd{system.time}(FFTruns <- \hlkwd{FFT.replicate}(FFT.rep, N, tList, lam, v, mu, initList, trueParam, s1.seq, 
-    s2.seq))
-\hlcom{# each 'column' of the result FFTruns corresponds to one of these lists each row}
-\hlcom{# corresponds to a dt in tList}
 
-FFT.params <- \hlkwd{vector}(\hlstr{"list"}, \hlkwd{length}(tList))
-FFT.coverage <- \hlkwd{mat.or.vec}(3, 3)
+Finally, we include some example plotting code to produce boxplots that clearly illustrate the advantage in using our method to compute transition probabilities. This code is not evaluated here, but should be used after increasing the number of repetitions in the above experiments.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{pdf}(\hlstr{'boxPlots.pdf'}, width = 11, height = 4 )
+\hlkwd{par}(mfrow=\hlkwd{c}(1,3))
+birthplot = \hlkwd{boxplot}(xaxt = \hlstr{'n'}, cex.lab = 1.3, ylab = \hlstr{"Estimate"}, 
+                    ylim = \hlkwd{c}(.02,.127), FFT.params[[1]][1,], FM.params[[1]][1,], 
+                    FFT.params[[2]][1,], FM.params[[2]][1,], FFT.params[[3]][1,], 
+                    FM.params[[3]][1,], col = \hlkwd{c}(0,\hlstr{"grey"},0,\hlstr{"grey"},0,\hlstr{"grey"}), 
+                    main = \hlstr{"Birth rate estimate"},cex.axis = 1.5, cex.main = 2.0, boxwex = .9)                                                                                                                                           
+\hlkwd{abline}(h = lam, lty = 2)
+\hlkwd{axis}(1, at=\hlkwd{c}(1.5,3.5,5.5), labels=tList, cex.axis = 1.5)
+\hlkwd{text}(\hlkwd{c}(1,3,5),.123, FFT.coverage[,1], cex = 1.5)
+\hlkwd{text}(\hlkwd{c}(2,4,6),.123, FM.coverage[,1], cex = 1.5)
 
-\hlcom{# fill the previous two lists/matrices}
-\hlkwd{for} (i in 1:\hlkwd{length}(tList)) \{
-    FFT.params[[i]] <- \hlkwd{sapply}(FFTruns[i, ], getEst)
-    coverMatrix <- \hlkwd{sapply}(FFTruns[i, ], getCover, trueParam = trueParam)
-    FFT.coverage[i, ] <- \hlkwd{apply}(coverMatrix, 1, mean)
+deathplot = \hlkwd{boxplot}(xaxt = \hlstr{"n"}, cex.lab = 2, xlab = \hlstr{"Time Interval Length"}, 
+                    ylim = \hlkwd{c}(.04,.202), FFT.params[[1]][3,], FM.params[[1]][3,], 
+                    FFT.params[[2]][3,], FM.params[[2]][3,],  FFT.params[[3]][3,], 
+                    FM.params[[3]][3,], col = \hlkwd{c}(0,\hlstr{"grey"},0,\hlstr{"grey"},0,\hlstr{"grey"}), 
+                    main = \hlstr{"Death rate estimate"}, cex.main = 2.0, boxwex = .9, cex.axis = 1.5)                                                                                                                                           
+\hlkwd{axis}(1, at=\hlkwd{c}(1.5,3.5,5.5), labels=tList, cex.axis = 1.5)
+\hlkwd{abline}(h = mu, lty = 2)
+\hlkwd{text}(\hlkwd{c}(1,3,5),.197, FFT.coverage[,3], cex = 1.5)
+\hlkwd{text}(\hlkwd{c}(2,4,6),.197, FM.coverage[,3], cex = 1.5)
+
+shiftplot = \hlkwd{boxplot}(xaxt = \hlstr{'n'}, ylim = \hlkwd{c}(0,.078), FFT.params[[1]][2,], FM.params[[1]][2,], 
+                    FFT.params[[2]][2,], FM.params[[2]][2,], FFT.params[[3]][2,], FM.params[[3]][2,], 
+                    col = \hlkwd{c}(0,\hlstr{"grey"},0,\hlstr{"grey"},0,\hlstr{"grey"}), main = \hlstr{"Shift rate estimate"},
+                    cex.main = 2.0, cex.axis = 1.5, boxwex = .9)                                                                                                                                           
+\hlkwd{abline}(h = v, lty = 2)
+\hlkwd{axis}(1, at=\hlkwd{c}(1.5,3.5,5.5), labels=tList, cex.axis = 1.5)
+\hlkwd{text}(\hlkwd{c}(1,3,5),.076, FFT.coverage[,2], cex = 1.5)
+\hlkwd{text}(\hlkwd{c}(2,4,6),.076, FM.coverage[,2], cex = 1.5)
+\hlkwd{legend}(\hlstr{"bottomright"},legend=\hlkwd{c}(\hlstr{"FFT"}, \hlstr{"FM"}), pch = \hlkwd{c}(0,15), pt.cex = 1.7, cex = 1.2, col=\hlkwd{c}(1, \hlstr{"grey"}))
+
+\hlkwd{dev.off}()
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+\section{Verifying Restricted Moments}
+Next, we compare our restricted moment calculations to their corresponding Monte Carlo estimates. We check that the expected birth calculation is accurate, for instance, by verifying the equality
+\[ E(N_t^+ | X_0 = i,j) = \sum_{k,l} E(N_t^+ , 1_{x_t = kl} | x_0 = i,j): \]
+
+The left hand side is verified via Monte Carlo simulation, simply counting the number of births per simulation of the process for $t$ time units, and averaging over realizations. The right hand side entries are those quantities computed using our generating functions in the main theorem of the paper: we compute these over a range of $i,j$ values that comprises most of the support, and sum them to compare with the Monte Carlo averages.
+
+The code below recreates a similar, smaller scale version of Figure 2 in the appendix:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+lam = 10*.0188; v = 10*.0026;  mu = 10*.0147 \hlcom{#increase rates here so there are not}
+\hlcom{#too many realizations with zero events, which thus requires more MC simulations}
+initNum = 10; param <- \hlkwd{c}(lam,v,mu)
+numSims = 3 \hlcom{#in practice, may increase number of MC simulations}
+
+tList <- \hlkwd{c}(.5,1,3,5)
+
+\hlcom{#compute Monte Carlo averages and empirical confidence intervals here}
+eventsMC <- sdsMC <- eventsFFT <- lMC <- uMC <- \hlkwd{mat.or.vec}(4, \hlkwd{length}(tList))
+\hlkwd{for}(i in 1:\hlkwd{length}(tList))\{
+  results = \hlkwd{sim.N.eventcount}(numSims, tList[i], lam, v, mu, initNum)
+  eventsMC[,i] <- \hlkwd{rowMeans}(results)
+  sdsMC[,i] <- \hlkwd{apply}(results,1,sd) 
+  lMC[,i] <- \hlkwd{apply}(results,1,quantile, probs = .025 )
+  uMC[,i] <- \hlkwd{apply}(results, 1, quantile, probs = .975)
 \}
+
+\hlcom{#these are lists of matrices of restricted means given ending count, list index by end time in tlist}
+bmeans <- \hlkwd{getBirthMeans.timeList}(tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
+smeans <- \hlkwd{getShiftMeans.timeList}(tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
+dmeans <- \hlkwd{getDeathMeans.timeList}(tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
+ptimes <- \hlkwd{getParticleT.timeList} (tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
+
+\hlkwd{for}(i in 1:\hlkwd{length}(tList))\{
+  eventsFFT[,i] <- \hlkwd{c}( \hlkwd{sum}(bmeans[[i]]), \hlkwd{sum}(smeans[[i]]), \hlkwd{sum}(dmeans[[i]]), -\hlkwd{sum}(ptimes[[i]]) )
+\}
+
+\hlcom{#pdf('restrictedMoments.pdf')}
+\hlkwd{par}(mfrow=\hlkwd{c}(2,2))
+\hlkwd{plot}(tList, eventsFFT[1,], pch = 1, col = 2, ylim = \hlkwd{c}(0,7.1), 
+     ylab = \hlstr{"Expectation"}, xlab = \hlstr{"Observation Interval Length"}, main = \hlstr{"Expected Births"})
+\hlkwd{plotCI}(tList, eventsMC[1,], pch = 2, col = 3, 
+       ui=eventsMC[1,]+1.96*sdsMC[1,], li=eventsMC[1,]-1.96*sdsMC[1,], add = TRUE)
+
+\hlkwd{plot}(tList, eventsFFT[2,], pch = 1, col = 2,ylim = \hlkwd{c}(0,1.7), 
+     ylab = \hlstr{"Expectation"}, xlab = \hlstr{"Observation Interval Length"}, main = \hlstr{"Expected Shifts"})
+\hlkwd{plotCI}(tList, eventsMC[2,], pch = 2, col = 3, 
+       ui=eventsMC[2,]+1.96*sdsMC[2,], li=eventsMC[2,]-1.96*sdsMC[2,], add = TRUE)
+
+\hlkwd{plot}(tList, eventsFFT[3,], pch = 1, col = 2, ylim = \hlkwd{c}(0,5.1), 
+     ylab = \hlstr{"Expectation"}, xlab = \hlstr{"Observation Interval Length"}, main = \hlstr{"Expected Deaths"})
+\hlkwd{plotCI}(tList, eventsMC[3,], pch = 2, col = 3, 
+       ui=eventsMC[3,]+1.96*sdsMC[3,], li=eventsMC[3,]-1.96*sdsMC[3,], add = TRUE)
+
+\hlkwd{plot}(tList, eventsFFT[4,], pch = 1, col = 2, ylim = \hlkwd{c}(0,65), 
+     ylab = \hlstr{"Expectation"}, xlab = \hlstr{"Observation Interval Length"}, main = \hlstr{"Expected Particle Time"})
+\hlkwd{plotCI}(tList, eventsMC[4,], pch = 2, col = 3, 
+       ui=eventsMC[4,]+1.96*sdsMC[4,], li=eventsMC[4,]-1.96*sdsMC[4,], add = TRUE)
+\hlcom{#dev.off()}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/minimal-unnamed-chunk-9} 
+
+}
+
+
+
+\end{knitrout}
+
+
+
+
+\section{EM algorithm for inference in covariate-dependent BDS process}
+We conclude this vignette with a tutorial on using our software for recovering the coefficient vector in the setting where rates depend on multiple covariates using the EM algorithm we developed. In this example, we create multiple independent ``patients" whose characteristics determine the patient-specific rates of their corresponding BDS processes. Recall from the main paper that rates of each process are determined by a vector of $c$ covariates $\mb{z}_p = (z_{p,1}, z_{p,2}, \ldots, z_{p, c} ) \in \mathbb{R}^c$ through a log-linear model: 
+\begin{equation}\label{eq:loglin}
+  \log(\lambda_p) = \boldsymbol\beta^\lambda \cdot \mathbf{z_p},  \log(\nu_p) = \boldsymbol\beta^\nu \cdot \mathbf{z_p}, \log(\mu_p) = \boldsymbol\beta^\mu \cdot \mathbf{z_p},
+  \end{equation}
+where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product.
+
+Following the simulation study in section 3.2 of the paper, we begin by specifying the true coefficient vector with 4 coefficients per rate:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+beta.lam <- \hlkwd{c}(\hlkwd{log}(7.5), \hlkwd{log}(0.5), \hlkwd{log}(0.3), \hlkwd{log}(3))
+beta.v <- \hlkwd{c}(\hlkwd{log}(0.5), \hlkwd{log}(8), \hlkwd{log}(0.5), \hlkwd{log}(0.9))
+beta.mu <- \hlkwd{c}(\hlkwd{log}(4), \hlkwd{log}(0.3), \hlkwd{log}(0.8), \hlkwd{log}(0.9))
+betas <- \hlkwd{c}(beta.lam, beta.v, beta.mu)  \hlcom{#true parameters}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+num.patients <- 20
+x1 <- \hlkwd{runif}(num.patients, 0, 2)
+x2 <- \hlkwd{runif}(num.patients, 6, 10)
+x3 <- \hlkwd{runif}(num.patients, 4, 6)
+patients.design <- \hlkwd{rbind}(1, x1, x2, x3)
+patients.rates <- \hlkwd{MakePatientRates}(patients.design, betas)
+patients.rates[, 1:5]  \hlcom{#show for first 5 patients}
+\end{alltt}
+\begin{verbatim}
+##          [,1]    [,2]     [,3]    [,4]     [,5]
+## [1,] 0.019530 0.38209 0.396176 0.00666 0.364480
+## [2,] 0.005862 0.03464 0.006562 0.01176 0.005262
+## [3,] 0.059600 0.19124 0.318432 0.04935 0.187961
+\end{verbatim}
+\begin{alltt}
+\hlkwd{apply}(patients.rates, 1, mean)
+\end{alltt}
+\begin{verbatim}
+## [1] 0.11037 0.02494 0.13883
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Now we are able to generate the discretely observed dataset using \texttt{MakePatientData}. Details are also available in the help file, but briefly, the simulated observation intervals are spaced $t.pat$ units apart, and between 2 and 7 observations per patient are created, with initial population uniformly drawn between $2$ and $14$. 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+t.pat <- 0.2
+\hlcom{# apply(patients.rates,1,mean) #this line displays the average lam, v, mu given the fake}
+\hlcom{# patients}
+PATIENTDATA <- \hlkwd{MakePatientData}(t.pat, num.patients, patients.rates)
+PATIENTDATA[, 1:8]
+\end{alltt}
+\begin{verbatim}
+##              [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## i               1    1    1    1    1    1    2    2
+## init.patient    2    2    2    2    2    2    7    7
+##                 3    2    2    1    2    2    7    7
+##                 3    2    2    1    2    2    6    7
+##                 0    0    0    0    0    0    0    3
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm, and when running the algorithm on a real dataset in this format, we may replace the second row with the observation interval length since they will generally not be evenly spaced. 
+
+Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to copy the code and verify the output over many simulations from different initial guesses.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+gridLength = 32 \hlcom{#can set to 32 also}
+s1.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
+s2.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
+
+\hlcom{#perturb around true values for initial guess:}
+betaInit <- \hlkwd{as.vector}(\hlkwd{rmvnorm}(1, mean = betas, sigma = \hlkwd{diag}(.1*\hlkwd{abs}(betas) )))
+
+relTol = .0000001 \hlcom{#relative convergence criteria}
+
+\hlcom{#Run EM algorithm}
+EMrun <- \hlkwd{EM.run}(betaInit, t.pat, num.patients, 
+                PATIENTDATA, patients.design, s1.seq, s2.seq, relTol)
+\hlcom{#post-hoc numerical confidence interval computation, a slow function}
+\hlcom{#sigma <- getStandardErrors(EMrun$betaEstimate, t.pat, }
+\hlcom{#                           num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq)}
+\hlcom{#upper95 <-EMrun$betaEstimate +1.96*sigma}
+\hlcom{#lower95 <-EMrun$betaEstimate -1.96*sigma}
+
+\hlcom{###Repeat using optim beginning from same initial guess, maxiter set to 2000}
+\hlcom{#add hessian=TRUE if standard errors needed}
+beta.optim <- \hlkwd{FFT.pat.optim}(betaInit, t.pat, num.patients, PATIENTDATA, 
+                            patients.design, s1.seq, s2.seq, relTol, 2000)  
 \end{alltt}
 \end{kframe}
 \end{knitrout}
