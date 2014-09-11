@@ -21,11 +21,11 @@
   \item{initNum}{An integer giving the number of initial
   particles}
 
-  \item{lam}{Birth rate, must be positive}
+  \item{lam}{Per-particle birth rate}
 
-  \item{v}{Shift rate, must be positive}
+  \item{v}{Per-particle shift rate}
 
-  \item{mu}{Death rate}
+  \item{mu}{Per-particle death rate}
 }
 \value{
   A list of matrices of dimension length(s1.seq) by
@@ -33,7 +33,7 @@
   evaluation time from tList
 }
 \description{
-  Wrapper that transforms the output matrices from
+  Transforms the output matrices from
   \code{\link{makeGrid.death.r1}} and
   \code{\link{makeGrid.death.partial}} to a list of
   expected sufficient statistics matrices using \code{fft}.

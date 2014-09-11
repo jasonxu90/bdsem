@@ -21,11 +21,11 @@
   \item{u}{A number giving the observation interval length,
   equivalently the time to evaluate the ODEs}
 
-  \item{lam}{Birth rate, must be positive}
+  \item{lam}{Per-particle birth rate}
 
-  \item{v}{Shift rate, must be positive}
+  \item{v}{Per-particle shift rate}
 
-  \item{mu}{Death rate}
+  \item{mu}{Per-particle death rate}
 }
 \value{
   A list of matrices of dimension length(s1.seq) by
@@ -33,7 +33,7 @@
   number of particles from initList
 }
 \description{
-  Wrapper that transforms the output matrices from
+  Transforms the output matrices from
   \code{\link{makeGrid.particleT.r0}} and
   \code{\link{makeGrid.particleT.partial}} to a list of
   expected sufficient statistics matrices using \code{fft}.

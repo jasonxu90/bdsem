@@ -28,8 +28,8 @@
   the function values
 }
 \description{
-  Wrapper applying \code{\link{solve.shift}} to a grid of
-  inputs s1, s2 at one fixed time and r=1
+  Applies the function \code{\link{solve.shift}} to a grid
+  of inputs s1, s2 at one fixed time and r=1
 }
 \examples{
 time = 5;  dt = 5; lam = .5; v = .2; mu = .4

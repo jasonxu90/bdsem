@@ -27,8 +27,8 @@
   the population in the \emph{i}th realization
 }
 \description{
-  Wrapper for \code{\link{simulate.one.true}} that simply
-  replicates the function N times
+  Repeats the function \code{\link{sim.one.true}} N times
+  using \code{replicate}
 }
 \examples{
 sim.N.true(10,2,.2,.12,.15,10)

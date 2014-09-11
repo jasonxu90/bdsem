@@ -28,8 +28,8 @@
   the function values
 }
 \description{
-  Wrapper applying \code{\link{solve.trans}} to a grid of
-  inputs s1, s2 for a fixed time.
+  Applies the function \code{\link{solve.trans}} to a grid
+  of inputs s1, s2 for a fixed time.
 }
 \examples{
 time = 5;  dt = 5; lam = .5; v = .2; mu = .4

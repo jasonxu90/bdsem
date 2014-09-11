@@ -9,7 +9,13 @@
   \item{initGuess}{A vector containing the initial guess of
   birth, shift, and death rates}
 
+  \item{param}{A vector of three numbers containing the
+  birth, shift, and death rate respectively}
+
   \item{u}{A number, the observation interval length}
+
+  \item{simDataList}{A list of matrices in the format
+  returned by \code{\link{makedata.simple}}}
 
   \item{initList}{A vector of possible initial populations}
 

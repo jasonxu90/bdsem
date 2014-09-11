@@ -21,11 +21,11 @@
   \item{initNum}{An integer giving the number of initial
   particles}
 
-  \item{lam}{Birth rate, must be positive}
+  \item{lam}{Per-particle birth rate}
 
-  \item{v}{Shift rate, must be positive}
+  \item{v}{Per-particle shift rate}
 
-  \item{mu}{Death rate}
+  \item{mu}{Per-particle death rate}
 }
 \value{
   A list of matrices of dimension length(s1.seq) by
@@ -34,7 +34,7 @@
   transition probabilities
 }
 \description{
-  Wrapper that transforms the output matrix from
+  Transforms the output matrix from
   \code{\link{makeGrid.trans}} to interpretable transition
   probabilities using \code{fft}. Does this at several
   input times given in tList. Returns a list of matrices,

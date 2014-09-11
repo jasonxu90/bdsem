@@ -28,7 +28,7 @@
   The function value of the deaths generating function
 }
 \description{
-  Wrapper that numerically solves the ODE defined in
+  Numerically solves the ODE defined in
   \code{\link{de.death}} using \code{zvode} from package
   \code{deSolve} given evaluation time, initial state
   values s1 and s2, and birth/shift/death rates

@@ -26,8 +26,7 @@
   of the process.
 }
 \description{
-  Wrapper that replicates
-  \code{\link{simulate.one.eventcount}} N times. Each
+  Replicates \code{\link{sim.one.eventcount}} N times. Each
   replication begins with initNum particles.
 }
 \examples{

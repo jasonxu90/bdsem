@@ -29,10 +29,10 @@
   indices present.
 }
 \description{
-  Wrapper for \code{\link{simulate.one.ran}} that simply
-  replicates the function N times. Each replication begins
-  with a random number of initial particles uniformly
-  generated from a specified range.
+  Repeats \code{\link{sim.one.ran}} N times using
+  \code{replicate}. Each replication begins with a random
+  number of initial particles uniformly generated from a
+  specified range.
 }
 \examples{
 ransim.N.true(10,2,.2,.12,.15, seq(7,15))

@@ -29,9 +29,9 @@
   the function values
 }
 \description{
-  Wrapper that numerically partially differentiates the
-  solution given in \code{\link{solve.shift}} over a grid
-  of input values s1, s2 at one fixed time, and r=1
+  Numerically partially differentiates the solution given
+  in \code{\link{solve.shift}} over a grid of input values
+  s1, s2 at one fixed time, and r=1
 }
 \examples{
 time = 5;  dt = 5; lam = .5; v = .2; mu = .4

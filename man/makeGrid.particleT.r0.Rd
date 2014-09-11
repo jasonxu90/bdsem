@@ -29,8 +29,8 @@
   the function values
 }
 \description{
-  Wrapper applying \code{\link{solve.particleT}} to a grid
-  of inputs s1, s2 at one fixed time and r=0
+  Applies \code{\link{solve.particleT}} to a grid of inputs
+  s1, s2 at one fixed time and r=0
 }
 \examples{
 time = 5;  dt = 5; lam = .5; v = .2; mu = .4
