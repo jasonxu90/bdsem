@@ -1778,10 +1778,14 @@ FFT.replicate <- function(numReps, N, tList, lam, v, mu, initList, initGuess, s1
 }
 
 
-#' Perform one E-step of the EM algorithm
+#' Perform one E-step of the EM algorithm for unevenly spaced observations
 #' 
 #' \code{ESTEP.realdata} performs one E-step of the EM algorithm similarly to \code{\link{ESTEP}},
-#' but for datasets with unevenly spaced time intervals between observations. 
+#' but for datasets with unevenly spaced time intervals between observations. In particular, the second
+#' row of the PATIENTDATA argument, a matrix returned by \code{\link{MakePatientData}} for simulated data
+#' contains no relevant information for the algorithm. When working with real data, we may create a matrix
+#' of the same format, except replace this row to instead contain information about the time between observations.
+#' 
 #' 
 #' @param betaVec A vector, the setting of beta coefficients
 #' @param num.patients An integer, number of unique patients
