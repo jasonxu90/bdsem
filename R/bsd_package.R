@@ -1778,3 +1778,62 @@ FFT.replicate <- function(numReps, N, tList, lam, v, mu, initList, initGuess, s1
 }
 
 
+#' Perform one E-step of the EM algorithm
+#' 
+#' \code{ESTEP.realdata} performs one E-step of the EM algorithm similarly to \code{\link{ESTEP}},
+#' but for datasets with unevenly spaced time intervals between observations. 
+#' 
+#' @param betaVec A vector, the setting of beta coefficients
+#' @param num.patients An integer, number of unique patients
+#' @param PATIENTDATA A matrix in the form returned by \code{\link{MakePatientData}} containing the set of observation intervals,
+#' but the second row now contains the observation interval lengths 
+#' @param patients.design A design matrix in the same form as returned by \code{\link{PatientDesignExample}}
+#' @param s1.seq A vector of complex arguments evenly spaced along the unit circle
+#' @param s2.seq A vector of complex arguments evenly spaced along the unit circle
+#' @return A list containing a matrix of the expected sufficient statistics as well as the observed log likelihood value
+ESTEP.realdata <- function(betaVec, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq){  
+  bLam <- betaVec[1:(length(betaVec)/3)]; bNu = betaVec[(length(betaVec)/3+1):(2*length(betaVec)/3)]; bMu = betaVec[(2*length(betaVec)/3 + 1) : length(betaVec)]
+  U <- D <- V <- P <- rep(0, num.patients) #initialize vectors of expected sufficient statistics
+  observedLikelihood <- 0
+  for(i in 1:num.patients){
+    #get lam, v, mu for current patient
+    lam <- exp( sum(bLam*patients.design[,i]))
+    v <- exp( sum(bNu*patients.design[,i])) 
+    mu <- exp(sum(bMu*patients.design[,i]))
+    #this takes the subset of the fake data corresponding to patient i
+    dat.i <- as.matrix(PATIENTDATA[,which(PATIENTDATA[1,]==UIDs[i])])
+    #loop over number of observations associated with current patient:
+    for(j in 1:dim(dat.i)[2]){
+      #these three items are indices to look up terms in our transition lists
+      n.initial <- dat.i[3,j]  #now this is actually initial number of particles, not an index
+      n.old <- dat.i[4,j]
+      n.new <- dat.i[5,j]
+      timeInterval <- dat.i[2,j] #interval length
+      #set the dt for numerical solver
+      dt = timeInterval
+      if( n.initial == n.old & n.new == 0){
+        #print('no event in this interval')
+        #zero expected counts to add, but particle time needs to be accounted for
+        P[i] <- P[i] + n.initial*timeInterval  #particle time is just initial particles multiplied by interval length in row 2
+        observedLikelihood <- observedLikelihood -n.initial*(lam+v+mu)*timeInterval
+      } else {
+        tpmMat <- getTrans(timeInterval, n.initial, lam, v, mu, s1.seq, s2.seq, dt)
+        restrictedBirthMat <- getBirthMeans(timeInterval, n.initial, lam, v, mu, s1.seq, s2.seq, dt)
+        restrictedDeathMat <- getDeathMeans(timeInterval, n.initial, lam, v, mu, s1.seq, s2.seq, dt)
+        restrictedShiftMat <- getShiftMeans(timeInterval, n.initial, lam, v, mu, s1.seq, s2.seq, dt)
+        restrictedParticleMat <- getParticleT(timeInterval, n.initial, lam, v, mu, s1.seq, s2.seq, dt)       
+        #we divide all the restricted moments by the corresponding transition probability
+        #we add to the i'th entry for each interval associated with patient i in this loop
+        observedLikelihood <- observedLikelihood + log(tpmMat[n.old+1, n.new+1])
+        U[i] <- U[i] + restrictedBirthMat[n.old+1, n.new+1]/tpmMat[n.old+1, n.new+1]
+        D[i] <- D[i] + restrictedDeathMat[n.old+1, n.new+1]/tpmMat[n.old+1, n.new+1]
+        V[i] <- V[i] + restrictedShiftMat[n.old+1, n.new+1]/tpmMat[n.old+1, n.new+1]
+        P[i] <- P[i] + restrictedParticleMat[n.old+1, n.new+1]/tpmMat[n.old+1, n.new+1]
+      }
+    }
+  }
+  result <- rbind(U,D,V,P)
+  result[result < 0] = .000001 #numerical stability for negatives
+  resultList <- list( 'matrix' = result, 'loglike' = observedLikelihood)
+  return(resultList)  #return the vectors of expected sufficient statistics
+}
