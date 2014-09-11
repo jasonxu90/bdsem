@@ -47,12 +47,13 @@ First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as i
  
 <<tidy=FALSE>>=
 library(bdsem)
+lam = .02; v = .008; mu = .015
 gridLength = 16
 s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 tList <- c(.5,2,6,10)
 transProbs <- getTrans.timeList(tList, 
-                                .0188, .00268, .0147, 10, s1.seq, s2.seq, .5)
+                                lam, v, mu, 10, s1.seq, s2.seq, .5)
 
 @
 The results are stored in \texttt{transProbs}, a list of matrices, where each entry contains a matrix corresponds to a time interval length from \texttt{tList}. 
@@ -73,9 +74,9 @@ These empirical transition probabilities via simulation serve as a ground truth 
 To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method via \texttt{getTrans.FreqMon}: %note this next section will take a while, even with a relatively small number of simulations
 <<>>=
 #nSims = 5000   #increase number of simulations for more precise estimates
-nSims = 3
-tp.MC <- getTrans.MC(nSims,tList,.02,.008,.015,10)
-tp.FM <- getTrans.FreqMon(tList, .02,.008,.015,10)
+nSims = 100
+tp.MC <- getTrans.MC(nSims,tList, lam, v, mu, 10)
+tp.FM <- getTrans.FreqMon(tList, lam, v, mu, 10)
 @
 
 It is easy to compare entries of \texttt{transProbs} and \texttt{tp.MC} to verify that our method calculates accurate values, although you must increase \texttt{nSims} to get meaningful Monte Carlo estimates. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed Figure 2 in the main paper. Again, the Monte Carlo results will be wildly inaccurate without increasing \texttt{nSims} in our example to an adequately large number; you are encouraged to re-run the above code with large \texttt{nSims} to recreate the results in the main paper.
@@ -181,7 +182,7 @@ for(i in 1:length(tList)){
 %In practice of course we need to increase the number of repetitions to produce reasonable estimates of parameters and coverage.
 Similarly, we may repeat the same steps using the frequent monitoring likelihood by then running the code below:
 <<eval=FALSE>>=
-FM.rep = 2
+FM.rep = 200
 FMruns <- FM.replicate(FM.rep,N,tList,lam,v,mu,initList, trueParam)
 
 FM.params <- vector("list",length(tList))
@@ -252,7 +253,7 @@ The code below recreates a similar, smaller scale version of Figure 2 in the app
 lam = 10*.0188; v = 10*.0026;  mu = 10*.0147 #increase rates here so there are not
 #too many realizations with zero events, which thus requires more MC simulations
 initNum = 10; param <- c(lam,v,mu)
-numSims = 3 #in practice, increase number of MC simulations
+numSims = 100 #in practice, increase number of MC simulations
 
 tList <- c(.5,1,3,5)
 
@@ -320,7 +321,7 @@ We conclude this vignette with a tutorial on using our software for recovering t
 \begin{equation}\label{eq:loglin}
   \log(\lambda_p) = \boldsymbol\beta^\lambda \cdot \mathbf{z_p},  \log(\nu_p) = \boldsymbol\beta^\nu \cdot \mathbf{z_p}, \log(\mu_p) = \boldsymbol\beta^\mu \cdot \mathbf{z_p},
   \end{equation}
-where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product.
+where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product. Note that inference for the simple BDS process that we studied using general optimization is possible by setting $\mb{z}_p$ to be only a vector of 1's, and $\boldsymbol\beta = \lambda, \nu, \mu$.
 
 Following the simulation study in section 3.2 of the paper, we begin by specifying the true coefficient vector with 4 coefficients per rate:
 <<>>=
@@ -348,7 +349,7 @@ PATIENTDATA[,1:8]
 @
 The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm, and when running the algorithm on a real dataset in this format, we may replace the second row with the observation interval length since they will generally not be evenly spaced. 
 
-Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to copy the code and verify the output over many simulations from different initial guesses.
+Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses.
 
 <<eval=FALSE, tidy=FALSE>>=
 gridLength = 32 #can set to 32 also
@@ -370,7 +371,7 @@ EMrun <- EM.run(betaInit, t.pat, num.patients,
 #lower95 <-EMrun$betaEstimate -1.96*sigma
 @
 
-A comparison to standard optimization using \texttt{optim} should specify the convergence criterion to also equal \texttt{relTol}:
+A comparison to standard optimization using \texttt{optim} can be run as shown below, with convergence criterion also equal \texttt{relTol}:
 <<eval=FALSE, tidy=FALSE>>=
 ###Repeat using optim beginning from same initial guess, maxiter set to 2000
 #add hessian=TRUE if standard errors needed

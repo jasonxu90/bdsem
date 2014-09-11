@@ -95,12 +95,13 @@ First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as i
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}(bdsem)
+lam = .02; v = .008; mu = .015
 gridLength = 16
 s1.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
 s2.seq <- \hlkwd{exp}(2*pi*1i*\hlkwd{seq}(from = 0, to = (gridLength-1))/gridLength)
 tList <- \hlkwd{c}(.5,2,6,10)
 transProbs <- \hlkwd{getTrans.timeList}(tList, 
-                                .0188, .00268, .0147, 10, s1.seq, s2.seq, .5)
+                                lam, v, mu, 10, s1.seq, s2.seq, .5)
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -113,23 +114,23 @@ For instance, in our example the transition probabilities corresponding to $t=6$
 \hlkwd{round}(transProbs[[3]][, 1:10], 3)
 \end{alltt}
 \begin{verbatim}
-##        [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7] [,8] [,9] [,10]
-##  [1,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [2,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [3,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [4,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [5,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [6,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-##  [7,] 0.002 0.004 0.003 0.001 0.001 0.000 0.000    0    0     0
-##  [8,] 0.014 0.019 0.013 0.006 0.002 0.001 0.000    0    0     0
-##  [9,] 0.053 0.066 0.043 0.020 0.007 0.002 0.001    0    0     0
-## [10,] 0.118 0.134 0.082 0.036 0.012 0.004 0.001    0    0     0
-## [11,] 0.120 0.123 0.069 0.028 0.009 0.003 0.001    0    0     0
-## [12,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-## [13,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-## [14,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-## [15,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
-## [16,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0    0     0
+##        [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8] [,9] [,10]
+##  [1,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+##  [2,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+##  [3,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+##  [4,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+##  [5,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+##  [6,] 0.000 0.001 0.001 0.001 0.001 0.000 0.000 0.000    0     0
+##  [7,] 0.002 0.006 0.007 0.006 0.003 0.001 0.001 0.000    0     0
+##  [8,] 0.011 0.026 0.028 0.019 0.009 0.004 0.001 0.000    0     0
+##  [9,] 0.039 0.075 0.067 0.039 0.017 0.006 0.002 0.001    0     0
+## [10,] 0.084 0.125 0.092 0.046 0.018 0.006 0.002 0.000    0     0
+## [11,] 0.080 0.087 0.052 0.022 0.008 0.002 0.001 0.000    0     0
+## [12,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+## [13,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+## [14,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+## [15,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
+## [16,] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000    0     0
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -142,7 +143,7 @@ The $k,l$ entry of the matrix corresponds to the transition probability $p_{(i,0
 transProbs[[3]][9, 1]
 \end{alltt}
 \begin{verbatim}
-## [1] 0.05284
+## [1] 0.03945
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -157,9 +158,9 @@ To compare with previous methods, we can also compute the probabilities of one b
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# nSims = 5000 #increase number of simulations for more precise estimates}
-nSims = 3
-tp.MC <- \hlkwd{getTrans.MC}(nSims, tList, 0.02, 0.008, 0.015, 10)
-tp.FM <- \hlkwd{getTrans.FreqMon}(tList, 0.02, 0.008, 0.015, 10)
+nSims = 100
+tp.MC <- \hlkwd{getTrans.MC}(nSims, tList, lam, v, mu, 10)
+tp.FM <- \hlkwd{getTrans.FreqMon}(tList, lam, v, mu, 10)
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -277,7 +278,7 @@ Similarly, we may repeat the same steps using the frequent monitoring likelihood
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-FM.rep = 2
+FM.rep = 200
 FMruns <- \hlkwd{FM.replicate}(FM.rep, N, tList, lam, v, mu, initList, trueParam)
 
 FM.params <- \hlkwd{vector}(\hlstr{"list"}, \hlkwd{length}(tList))
@@ -358,7 +359,7 @@ The code below recreates a similar, smaller scale version of Figure 2 in the app
 lam = 10*.0188; v = 10*.0026;  mu = 10*.0147 \hlcom{#increase rates here so there are not}
 \hlcom{#too many realizations with zero events, which thus requires more MC simulations}
 initNum = 10; param <- \hlkwd{c}(lam,v,mu)
-numSims = 3 \hlcom{#in practice, increase number of MC simulations}
+numSims = 100 \hlcom{#in practice, increase number of MC simulations}
 
 tList <- \hlkwd{c}(.5,1,3,5)
 
@@ -446,7 +447,7 @@ We conclude this vignette with a tutorial on using our software for recovering t
 \begin{equation}\label{eq:loglin}
   \log(\lambda_p) = \boldsymbol\beta^\lambda \cdot \mathbf{z_p},  \log(\nu_p) = \boldsymbol\beta^\nu \cdot \mathbf{z_p}, \log(\mu_p) = \boldsymbol\beta^\mu \cdot \mathbf{z_p},
   \end{equation}
-where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product.
+where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product. Note that inference for the simple BDS process that we studied using general optimization is possible by setting $\mb{z}_p$ to be only a vector of 1's, and $\boldsymbol\beta = \lambda, \nu, \mu$.
 
 Following the simulation study in section 3.2 of the paper, we begin by specifying the true coefficient vector with 4 coefficients per rate:
 \begin{knitrout}
@@ -474,16 +475,16 @@ patients.rates <- \hlkwd{MakePatientRates}(patients.design, betas)
 patients.rates[, 1:5]  \hlcom{#show for first 5 patients}
 \end{alltt}
 \begin{verbatim}
-##          [,1]     [,2]    [,3]     [,4]    [,5]
-## [1,] 0.002908 0.057637 0.02685 0.096033 1.35955
-## [2,] 0.017446 0.005327 0.07416 0.003487 0.02617
-## [3,] 0.025373 0.250202 0.05723 0.146435 0.15840
+##         [,1]     [,2]     [,3]     [,4]     [,5]
+## [1,] 1.20832 0.036605 0.217645 0.053912 0.012034
+## [2,] 0.01846 0.000511 0.005383 0.003241 0.002035
+## [3,] 0.18490 0.275669 0.362063 0.137993 0.138151
 \end{verbatim}
 \begin{alltt}
 \hlkwd{apply}(patients.rates, 1, mean)
 \end{alltt}
 \begin{verbatim}
-## [1] 0.1845 0.0198 0.1564
+## [1] 0.32403 0.01322 0.23550
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -499,18 +500,18 @@ PATIENTDATA[, 1:8]
 \end{alltt}
 \begin{verbatim}
 ##              [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-## i               1    1    1    1    1    2    2    2
-## init.patient    7    7    7    7    7    8    8    8
-##                 7    7    6    8    8    8    7    7
-##                 7    7    6    8    8    8    7    6
-##                 0    0    0    0    0    0    0    0
+## i               1    1    1    1    2    2    3    3
+## init.patient    2    2    2    2    8    8   11   11
+##                 3    1    2    1    7    7   11   12
+##                 2    1    2    1    7    5   11   12
+##                 1    0    0    0    0    0    1    0
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
 The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm, and when running the algorithm on a real dataset in this format, we may replace the second row with the observation interval length since they will generally not be evenly spaced. 
 
-Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to copy the code and verify the output over many simulations from different initial guesses.
+Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -537,7 +538,7 @@ EMrun <- \hlkwd{EM.run}(betaInit, t.pat, num.patients,
 \end{knitrout}
 
 
-A comparison to standard optimization using \texttt{optim} should specify the convergence criterion to also equal \texttt{relTol}:
+A comparison to standard optimization using \texttt{optim} can be run as shown below, with convergence criterion also equal \texttt{relTol}:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
