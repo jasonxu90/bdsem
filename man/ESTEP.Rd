@@ -1,6 +1,6 @@
 \name{ESTEP}
 \alias{ESTEP}
-\title{Perform one E-step of the EM algorithm}
+\title{Perform one accelerated E-step of the EM algorithm}
 \usage{
   ESTEP(betaVec, t.pat, num.patients, PATIENTDATA,
     patients.design, s1.seq, s2.seq)

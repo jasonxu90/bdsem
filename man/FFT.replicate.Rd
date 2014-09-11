@@ -38,6 +38,11 @@
   \code{\link{FM.replicate}}
 }
 \description{
-  Replicate the function \code{\link{FFT.run}}
+  This function does the same as
+  \code{\link{FM.replicate}}, but optimizes the likelihood
+  based on transition probabilities computed by the
+  generating function method instead of using frequent
+  monitoring. An example of usage is included in the
+  vignette.
 }
 

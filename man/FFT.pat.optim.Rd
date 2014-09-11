@@ -41,4 +41,8 @@
   \code{optim} to maximize the log likelihood function
   \code{\link{logFFT.patients}}.
 }
+\details{
+  Example code is not included here because of runtime; see
+  vignette for tutorial on using this function.
+}
 

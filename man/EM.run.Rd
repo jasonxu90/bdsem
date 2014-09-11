@@ -44,4 +44,8 @@
   log-likelihood changes less than a specified relative
   tolerance between iterations
 }
+\details{
+  Examples are not included here due to runtime, but see
+  vignette for usage.
+}
 

@@ -34,4 +34,7 @@
   tList. Next, the frequent monitoring log-likelihood is
   maximized using \code{\link{FM.optim}} for each dataset.
 }
+\details{
+  See accompanying vignette for example usage.
+}
 

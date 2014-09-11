@@ -37,7 +37,7 @@
   be larger sized in the case where rates are large
 }
 \examples{
-N = 500; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
+N = 50; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
 getTrans.MC(N,tList,lam,v,mu,initNum)
 }
 

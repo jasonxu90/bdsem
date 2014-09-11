@@ -30,6 +30,6 @@
   replication begins with initNum particles.
 }
 \examples{
-sim.N.eventcount(10,2,.2,.12,.15,10)
+sim.N.eventcount(5,2,.2,.12,.15,10)
 }
 

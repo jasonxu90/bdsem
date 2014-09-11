@@ -17,6 +17,10 @@
   monitoring log-likelihood
 }
 \description{
-  Optimizes the frequent monitoring log-likelihood
+  This function converts a dataset generated in the format
+  returned by \code{\link{makedata.simple}} and finds the
+  intervals compatible under FM using
+  \code{\link{FM.data}}, then infers the MLE birth, shift,
+  and death rates.
 }
 

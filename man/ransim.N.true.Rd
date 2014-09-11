@@ -35,6 +35,6 @@
   specified range.
 }
 \examples{
-ransim.N.true(10,2,.2,.12,.15, seq(7,15))
+ransim.N.true(5,2,.2,.12,.15, seq(7,15))
 }
 

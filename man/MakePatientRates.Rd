@@ -34,7 +34,7 @@
   \mathbf{z_p} }
 }
 \examples{
-num.patients = 100
+num.patients = 20
 patients.design <- PatientDesignExample(num.patients)
 beta.lam <- c(log(8), log(.6)); beta.v <- c( log(.5), log(.7)); beta.mu <- c(log(.8), log(.8))
 betas <- c(beta.lam,beta.v,beta.mu)

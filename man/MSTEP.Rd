@@ -1,6 +1,6 @@
 \name{MSTEP}
 \alias{MSTEP}
-\title{Execute a Newton-Raphson step in M-step of the EM algorithm}
+\title{Execute a Newton-Raphson step within M-step of the EM algorithm}
 \usage{
   MSTEP(matrix, betaVec, num.patients, patients.design)
 }

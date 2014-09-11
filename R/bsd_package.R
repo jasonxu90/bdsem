@@ -1023,7 +1023,7 @@ sim.one.ran <- function(t.end, lam, v, mu, initNum){  #also stores initial numbe
 #' initial numbers, the second row contains the number of original indices still present in the population by t.end,
 #' and the third row contains the number of new indices present.
 #' @examples
-#' ransim.N.true(10,2,.2,.12,.15, seq(7,15))
+#' ransim.N.true(5,2,.2,.12,.15, seq(7,15))
 ransim.N.true<- function(N, t.end,lam,v,mu,range){
   replicate(N, sim.one.ran(t.end, lam, v, mu, sample(range,1)))
 }
@@ -1105,7 +1105,7 @@ sim.one.eventcount <- function(t.end, lam, v, mu, initNum){
 #' @return A 4 by N matrix, where rows correspond to total copies, shifts, deaths, and particle time per realization, respectively.
 #' Each column corresponds to one realization of the process.
 #' @examples
-#' sim.N.eventcount(10,2,.2,.12,.15,10)
+#' sim.N.eventcount(5,2,.2,.12,.15,10)
 sim.N.eventcount<- function(N, t.end,lam,v,mu,initNum){
   replicate(N, sim.one.eventcount(t.end, lam, v, mu, initNum))
 }
@@ -1172,7 +1172,7 @@ PatientDesignExample <- function(num.patients){
 #' @return A \eqn{3 \times m} matrix where m is the number of patients, and rows correspond to birth, shift, and death rates respectively. 
 #' 
 #' @examples
-#' num.patients = 100
+#' num.patients = 20
 #' patients.design <- PatientDesignExample(num.patients)
 #' beta.lam <- c(log(8), log(.6)); beta.v <- c( log(.5), log(.7)); beta.mu <- c(log(.8), log(.8))
 #' betas <- c(beta.lam,beta.v,beta.mu)
@@ -1238,7 +1238,7 @@ MakePatientData <- function(t, num.patients, patients.rates){
 #' with initNum type 1 particles, by the end of the corresponding observation length.
 #' 
 #' @examples
-#' N = 500; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
+#' N = 50; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
 #' getTrans.MC(N,tList,lam,v,mu,initNum)
 getTrans.MC <- function(N, tList, lam,v,mu, initNum){
   tpm.list <- vector("list", length(tList))     #this will store 2 by 2 transitions
@@ -1303,7 +1303,9 @@ logFFT.patients <- function(betas, t.pat, num.patients, PATIENTDATA, patients.de
 #' Optimizes the function \code{\link{logFFT.patients}} using \code{optim} package
 #' 
 #' Function uses Nelder-Mead optimization as implemented in \code{optim} to maximize the log likelihood function
-#' \code{\link{logFFT.patients}}.
+#' \code{\link{logFFT.patients}}. 
+#' 
+#' Example code is not included here because of runtime; see vignette for tutorial on using this function.
 #' 
 #' @param betaInit A vector, the initial guess for the algorithm
 #' @param t.pat A number, the observation interval length
@@ -1323,7 +1325,7 @@ FFT.pat.optim <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.d
 }
 
 
-#' Perform one E-step of the EM algorithm
+#' Perform one accelerated E-step of the EM algorithm
 #' 
 #' \code{ESTEP} performs one E-step of the EM algorithm, computing expected sufficient statistics given current settings
 #' of the parameters. This function is the "accelerated" version, meaning that intervals with no observed changes are computed
@@ -1446,7 +1448,7 @@ ESTEP.slow <- function(betaVec, t.pat, num.patients, PATIENTDATA, patients.desig
 #performs one newton raphson step: takes in matrix returned by E step and current estimate of parameters as arguments
 #returns the new betas after a newton raphson update
 
-#' Execute a Newton-Raphson step in M-step of the EM algorithm
+#' Execute a Newton-Raphson step within M-step of the EM algorithm
 #' 
 #' \code{MSTEP} executes one iteration of a Newton-Raphson algorithm as part of the maximization (M-step) of the EM algorithm. 
 #' Given the matrix of expected sufficient statistics returned by \code{\link{ESTEP}}, this function uses closed form gradient and
@@ -1487,6 +1489,8 @@ MSTEP <- function(matrix, betaVec, num.patients, patients.design){
 #' This function runs the EM algorithm from an initial guess. Infers the coefficient vector in setting where rates
 #' depend on patient-specific covariates. The EM algorithm alternates between calling \code{\link{ESTEP}} and \code{\link{MSTEP}}
 #' until the change in observed log-likelihood changes less than a specified relative tolerance between iterations
+#' 
+#' Examples are not included here due to runtime, but see vignette for usage.
 #' 
 #' @param betaInit A vector, the initial guess for coefficients beta
 #' @param t.pat A number, the observation interval length
@@ -1636,6 +1640,10 @@ FM.data <- function(simDataList, u){
 
 #' Optimizes the frequent monitoring log-likelihood
 #' 
+#' This function converts a dataset generated in the format returned by \code{\link{makedata.simple}} 
+#' and finds the intervals compatible under FM using \code{\link{FM.data}}, then infers the MLE birth, 
+#' shift, and death rates.
+#' 
 #' @param simDataList A list of synthetic observed datasets, returned by \code{\link{makedata.simple}}
 #' @param u The index of the desired entry of simDataList
 #' @param initGuess A vector, initial guess for beta
@@ -1677,6 +1685,8 @@ getEst <- function(opt){
 #' a dataset for each observation time length in tList. 
 #' Next, the frequent monitoring log-likelihood is maximized using \code{\link{FM.optim}} for each dataset.
 #' 
+#' See accompanying vignette for example usage.
+#' 
 #' @inheritParams makedata.simple
 #' @param initGuess Vector of numbers, initial guess for \code{optim}
 #' @return A list of optim objects
@@ -1700,7 +1710,7 @@ FM.run <- function(N, tList, lam, v, mu,initList, initGuess){
 #' tList <- c(.2,.4,.6); initList <- c(1:15)
 #' lam = .06; v = .02; mu = .11
 #' trueParam <- c(lam,v,mu) 
-#' N = 100; numReps = 2
+#' N = 50; numReps = 2
 #' example <- FM.replicate(numReps,N,tList,lam,v,mu,initList, trueParam)
 FM.replicate <- function(numReps,N,tList,lam,v,mu,initList, initGuess){
   replicate(numReps, FM.run(N,tList,lam,v,mu,initList, initGuess))
@@ -1769,6 +1779,10 @@ FFT.run <- function(N, tList, lam, v, mu, initList, initGuess, s1.seq, s2.seq ){
 }
 
 #' Replicate the function \code{\link{FFT.run}}
+#' 
+#' This function does the same as \code{\link{FM.replicate}}, but optimizes the likelihood based on transition
+#' probabilities computed by the generating function method instead of using frequent monitoring. An example
+#' of usage is included in the vignette.
 #' 
 #' @param numReps The number of replications
 #' @inheritParams FFT.run

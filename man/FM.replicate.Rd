@@ -39,7 +39,7 @@
 tList <- c(.2,.4,.6); initList <- c(1:15)
 lam = .06; v = .02; mu = .11
 trueParam <- c(lam,v,mu)
-N = 100; numReps = 2
+N = 50; numReps = 2
 example <- FM.replicate(numReps,N,tList,lam,v,mu,initList, trueParam)
 }
 
