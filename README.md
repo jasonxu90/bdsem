@@ -1,4 +1,4 @@
 bdsem
 =====
 
-EM algorithm for birth-shift-death processes
+EM algorithm for inference in discretely observed birth-shift-death processes

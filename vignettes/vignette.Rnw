@@ -59,9 +59,9 @@ transProbs <- getTrans.timeList(tList,
 
 @
 The results are stored in \texttt{transProbs}, a list of matrices, where each entry contains a matrix corresponds to a time interval length from \texttt{tList}. 
-For instance, in our example the transition probabilities corresponding to $t=6$ are contained in the matrix shown below, whose first 10 columns are shown rounded to 3 digits:
+For instance, in our example the transition probabilities corresponding to $t=6$ are contained in the matrix shown below, whose first 10 rows and columns are shown rounded to 3 digits:
 <<>>=
-round(transProbs[[3]][,1:10],3)
+round(transProbs[[3]][1:10,1:10],3)
 @
 
 The $k,l$ entry of the matrix corresponds to the transition probability $p_{(i,0),(k-1,l-1)(t)}$. For example, the specific transition probability $p_{(10,0),(8,0)}(6)$ can be looked up
@@ -81,7 +81,7 @@ tp.MC <- getTrans.MC(nSims,tList, lam, v, mu, 10)
 tp.FM <- getTrans.FreqMon(tList, lam, v, mu, 10)
 @
 
-It is easy to compare entries of \texttt{transProbs} and \texttt{tp.MC} to verify that our method calculates accurate values, although you must increase \texttt{nSims} to get meaningful Monte Carlo estimates. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed Figure 2 in the main paper. Again, the Monte Carlo results will be wildly inaccurate without increasing \texttt{nSims} in our example to an adequately large number; you are encouraged to re-run the above code with large \texttt{nSims} to recreate the results in the main paper.
+It is easy to compare corresponding entries of \texttt{transProbs} and \texttt{tp.MC} to verify that our method calculates accurate values, although you must increase \texttt{nSims} for accurate Monte Carlo estimates. We can also plot the transition probabilities defined under frequent monitoring as computed in all three cases, similar to the more detailed Figure 2 in the main paper. Again, the Monte Carlo results may be inaccurate without increasing \texttt{nSims} in our example to an adequately large number; you are encouraged to re-run the above code with large \texttt{nSims} to recreate the results in the main paper.
 
 
 <<tidy=FALSE>>=
@@ -250,7 +250,7 @@ E(N_t^+ | X_0 = i,j) = \sum_{k,l} E(N_t^+ , 1_{x_t = kl} | x_0 = i,j):
 
 The left hand side is verified via Monte Carlo simulation, simply counting the number of births per simulation of the process for $t$ time units, and averaging over realizations. The right hand side entries are those quantities computed using our generating functions in the main theorem of the paper: we compute these over a range of $i,j$ values that comprises most of the support, and sum them to compare with the Monte Carlo averages.
 
-The code below recreates a similar, smaller scale version of Figure 2 in the appendix: again, Monte Carlo results are nonsensical without increasing \texttt{numSims} below.
+The code below recreates a similar, smaller scale version of Figure 2 in the appendix: again, Monte Carlo results are improved by increasing \texttt{numSims} below. Begin by initializing parameters and computing Monte Carlo empirical estimates via the function \texttt{sim.N.eventcount}:
 <<tidy=FALSE>>=
 lam = 10*.0188; v = 10*.0026;  mu = 10*.0147 #increase rates here so there are not
 #too many realizations with zero events, which thus requires more MC simulations
@@ -270,9 +270,8 @@ for(i in 1:length(tList)){
 }
 @
 
-Now we compute the restricted moments using our method:
+Now we compute the restricted moments using our method: this step involves solving an ordinary differential equation numerically for each $(i,j$) pair, where $i,j$ are entries in \texttt{s1.seq, s2.seq}, and then taking the fast Fourier transform of the result:
 <<tidy=FALSE>>=
-
 #these are lists of matrices of restricted means given ending count, 
 #list index corresponds to entries of tlist
 bmeans <- getBirthMeans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
@@ -281,7 +280,8 @@ dmeans <- getDeathMeans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
 ptimes <- getParticleT.timeList (tList, lam, v, mu, initNum, s1.seq, s2.seq, .5)
 @
 
-Next, we sum the entries of each matrix of restricted means (the right hand side of equation 1, and plot results:
+The result stored in each of the four entries above is in a similar format as \texttt{transProbs} from the first example, containing restricted means instead of probabilities.
+Next, we sum the entries in each of these restricted mean matrices (the right hand side of equation 1), and plot results alongside MC estimates:
 <<tidy=FALSE>>=
 for(i in 1:length(tList)){
   eventsFFT[,i] <- c( sum(bmeans[[i]]), sum(smeans[[i]]), 
@@ -335,7 +335,7 @@ betas <- c(beta.lam,beta.v,beta.mu) #true parameters
 
 Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
 <<>>=
-num.patients <- 20
+num.patients <- 100
 x1 <- runif(num.patients,0,2); x2 <- runif(num.patients,6,10) ; x3 <- runif(num.patients,4,6)  
 patients.design <- rbind(1, x1,x2,x3) 
 patients.rates <- MakePatientRates(patients.design, betas)
@@ -349,7 +349,7 @@ t.pat <- .2
 PATIENTDATA <- MakePatientData(t.pat, num.patients, patients.rates)
 PATIENTDATA[,1:8]
 @
-The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm, and when running the algorithm on a real dataset in this format, we may replace the second row with the observation interval length since they will generally not be evenly spaced. 
+The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm. When running the algorithm on a real dataset, we first convert the data to this format, but we may replace the second row with the observation interval lengths since they will generally not be evenly spaced and are necessary information to the E-step. Then, we simply replace the function \texttt{ESTEP} with \texttt{ESTEP.realdata}, which replaces the constant interval length supplied by argument \texttt{t.pat} by the information supplied in the second row of \texttt{PATIENTDATA}.
 
 Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses.
 
