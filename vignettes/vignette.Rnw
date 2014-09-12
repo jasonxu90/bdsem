@@ -351,7 +351,9 @@ PATIENTDATA[,1:8]
 @
 The first row corresponds to a patient ID, and the last three rows contain information about the state of the process $\mb{X}(t)$ at the endpoints of the observation interval. This is detailed in the help file, but note that the second row contains information about the average initial number of particles used to simulate data for that patient. This information is not used at any stage in the EM algorithm. When running the algorithm on a real dataset, we first convert the data to this format, but we may replace the second row with the observation interval lengths since they will generally not be evenly spaced and are necessary information to the E-step. Then, we simply replace the function \texttt{ESTEP} with \texttt{ESTEP.realdata}, which replaces the constant interval length supplied by argument \texttt{t.pat} by the information supplied in the second row of \texttt{PATIENTDATA}.
 
-Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses.
+Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses. 
+
+We note that the algorithm is numerically sensitive to some degree, and some settings of initial guess may fail to converge. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. 
 
 <<eval=FALSE, tidy=FALSE>>=
 gridLength = 32 #can set to 32 also
