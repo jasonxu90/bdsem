@@ -353,7 +353,7 @@ The first row corresponds to a patient ID, and the last three rows contain infor
 
 Finally, running the EM algorithm to recover the coefficients given data generated in this format is straightforward after specifying a few more settings and using the function \texttt{EM.run}. The following code takes some time to run, especially as we increase the number of simulated patients, and is not evaluated here. You are encouraged to run the code and verify the output over many simulations from different initial guesses. 
 
-We note that the algorithm is numerically sensitive to some degree, and some settings of initial guess may fail to converge. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. 
+We note that the algorithm is numerically sensitive in the sense that initial guesses which are ill-suited for the corresponding dataset may lead to overflow/underflow in numerical computations. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. In our simulation studies included in paper, roughly half of the initial guesses fail, but our algorithm is robust in the sense that those that do converge result at the same solution. Similar issues may arise in black box optimization, but as we show in the paper, even using relatively robust standard optimization methods such as Nelder-Mead lead to a disparate range of results at convergence, which is highly undesirable.
 
 <<eval=FALSE, tidy=FALSE>>=
 gridLength = 32 #can set to 32 also
