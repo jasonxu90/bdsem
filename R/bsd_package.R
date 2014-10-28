@@ -556,7 +556,7 @@ makeGrid.particleT.partial <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
 #' 
 #' @examples 
 #' tList = c(1,2);  dt = 1; lam = .5; v = .2; mu = .4; initNum = 10
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getTrans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, dt)
@@ -590,7 +590,7 @@ getTrans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt){
 #' @return A list of matrices of dimension length(s1.seq) by length(s2.seq); each list entry corresponds to an evaluation time from tList
 #' @examples 
 #' tList = c(1,2);  dt = 1; lam = .5; v = .2; mu = .4; initNum = 10
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getParticleT.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, dt)
@@ -626,7 +626,7 @@ getParticleT.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt)
 #' 
 #' @examples 
 #' tList = c(1,2);  dt = 1; lam = .5; v = .2; mu = .4; initNum = 10
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getDeathMeans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, dt)
@@ -662,7 +662,7 @@ getDeathMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
 #' 
 #' @examples 
 #' tList = c(1,2);  dt = 1; lam = .5; v = .2; mu = .4; initNum = 10
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getShiftMeans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, dt)
@@ -698,7 +698,7 @@ getShiftMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
 #' 
 #' @examples 
 #' tList = c(1,2);  dt = 1; lam = .5; v = .2; mu = .4; initNum = 10
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getBirthMeans.timeList(tList, lam, v, mu, initNum, s1.seq, s2.seq, dt)
@@ -736,7 +736,7 @@ getBirthMeans.timeList <- function(tList, lam, v, mu, initNum, s1.seq,s2.seq, dt
 #' initList = c(10,11) 
 #' #gives matrices of transition probabilities corresponding to 10 initial particles and 11 initial particles
 #' u = 1; dt = 1; lam = .5; v = .2; mu = .4
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getTrans.initList(u, initList, lam, v, mu, s1.seq, s2.seq, dt)
@@ -775,7 +775,7 @@ getTrans.initList <- function(u, initList, lam, v, mu, s1.seq, s2.seq, dt){  #in
 #' initList = c(10,11) 
 #' #gives matrices of expected sufficient statistics corresponding to 10 initial particles and 11 initial particles
 #' u = 1; dt = 1; lam = .5; v = .2; mu = .4
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getBirthMeans.initList(u, initList, lam, v, mu, s1.seq, s2.seq, dt)
@@ -812,7 +812,7 @@ getBirthMeans.initList <- function(u, initList, lam, v, mu, s1.seq, s2.seq, dt){
 #' initList = c(10,11) 
 #' #gives matrices of expected sufficient statistics corresponding to 10 initial particles and 11 initial particles
 #' u = 1; dt = 1; lam = .5; v = .2; mu = .4
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getShiftMeans.initList(u, initList, lam, v, mu, s1.seq, s2.seq, dt)
@@ -849,7 +849,7 @@ getShiftMeans.initList <- function(u, initList, lam, v, mu, s1.seq, s2.seq, dt){
 #' initList = c(10,11) 
 #' #gives matrices of expected sufficient statistics corresponding to 10 initial particles and 11 initial particles
 #' u = 1; dt = 1; lam = .5; v = .2; mu = .4
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getDeathMeans.initList(u, initList, lam, v, mu, s1.seq, s2.seq, dt)
@@ -886,7 +886,7 @@ getDeathMeans.initList <- function(u, initList, lam, v, mu, s1.seq, s2.seq, dt){
 #' initList = c(10,11) 
 #' #gives matrices of expected sufficient statistics corresponding to 10 initial particles and 11 initial particles
 #' u = 1; dt = 1; lam = .5; v = .2; mu = .4
-#' gridLength = 32
+#' gridLength = 16
 #' s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #' getParticleT.initList(u, initList, lam, v, mu, s1.seq, s2.seq, dt)
@@ -1105,7 +1105,7 @@ sim.one.eventcount <- function(t.end, lam, v, mu, initNum){
 #' @return A 4 by N matrix, where rows correspond to total copies, shifts, deaths, and particle time per realization, respectively.
 #' Each column corresponds to one realization of the process.
 #' @examples
-#' sim.N.eventcount(5,2,.2,.12,.15,10)
+#' sim.N.eventcount(3,2,.2,.12,.15,10)
 sim.N.eventcount<- function(N, t.end,lam,v,mu,initNum){
   replicate(N, sim.one.eventcount(t.end, lam, v, mu, initNum))
 }
@@ -1131,7 +1131,7 @@ sim.N.eventcount<- function(N, t.end,lam,v,mu,initNum){
 #' @return A list of matrices. Each entry in the list is in the format returned by \code{\link{ransim.N.true}}, and 
 #' corresponds to equal observation times specified in the corresponding entry in tList
 #' @examples
-#' makedata.simple(30,c(.2,.4,.6),.2,.12,.15,seq(8,12))
+#' makedata.simple(10,c(.2,.4,.6),.2,.12,.15,seq(8,12))
 makedata.simple <- function(N, tList, lam, v, mu, initList){
   simDataList <- vector("list", length(tList))
   for(i in 1:length(tList)){
@@ -1172,7 +1172,7 @@ PatientDesignExample <- function(num.patients){
 #' @return A \eqn{3 \times m} matrix where m is the number of patients, and rows correspond to birth, shift, and death rates respectively. 
 #' 
 #' @examples
-#' num.patients = 20
+#' num.patients = 10
 #' patients.design <- PatientDesignExample(num.patients)
 #' beta.lam <- c(log(8), log(.6)); beta.v <- c( log(.5), log(.7)); beta.mu <- c(log(.8), log(.8))
 #' betas <- c(beta.lam,beta.v,beta.mu)
@@ -1238,7 +1238,7 @@ MakePatientData <- function(t, num.patients, patients.rates){
 #' with initNum type 1 particles, by the end of the corresponding observation length.
 #' 
 #' @examples
-#' N = 50; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
+#' N = 20; tList = c(.5,1); lam = .2; v = .1; mu = .15; initNum = 10
 #' getTrans.MC(N,tList,lam,v,mu,initNum)
 getTrans.MC <- function(N, tList, lam,v,mu, initNum){
   tpm.list <- vector("list", length(tList))     #this will store 2 by 2 transitions

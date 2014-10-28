@@ -75,8 +75,8 @@ These empirical transition probabilities via simulation serve as a ground truth 
 
 To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method via \texttt{getTrans.FreqMon}: %note this next section will take a while, even with a relatively small number of simulations
 <<>>=
-#nSims = 5000   #increase number of simulations for more precise estimates
-nSims = 100
+#nSims = 200    # further increase number of simulations for more precise estimates
+nSims = 10      # for speed of compilation, should increase
 tp.MC <- getTrans.MC(nSims,tList, lam, v, mu, 10)
 tp.FM <- getTrans.FreqMon(tList, lam, v, mu, 10)
 @
@@ -255,8 +255,8 @@ The code below recreates a similar, smaller scale version of Figure 2 in the app
 lam = 10*.0188; v = 10*.0026;  mu = 10*.0147 #increase rates here so there are not
 #too many realizations with zero events, which thus requires more MC simulations
 initNum = 10; param <- c(lam,v,mu)
-numSims = 100 #in practice, increase number of MC simulations
-
+#numSims = 200 #in practice, increase number of MC simulations
+numSims = 10    # to compile quickly; use at least 100
 tList <- c(.5,1,3,5)
 
 #compute Monte Carlo averages and empirical confidence intervals here
@@ -335,7 +335,7 @@ betas <- c(beta.lam,beta.v,beta.mu) #true parameters
 
 Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
 <<>>=
-num.patients <- 100
+num.patients <- 20  #again, recommend at least 100
 x1 <- runif(num.patients,0,2); x2 <- runif(num.patients,6,10) ; x3 <- runif(num.patients,4,6)  
 patients.design <- rbind(1, x1,x2,x3) 
 patients.rates <- MakePatientRates(patients.design, betas)
