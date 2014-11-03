@@ -49,6 +49,7 @@ First, we specify desired birth, shift, and death rates $\lambda, \nu, \mu$ as i
 
 <<tidy=FALSE>>=
 library(bdsem)
+library(mvtnorm)
 lam = .02; v = .008; mu = .015
 gridLength = 16
 s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
@@ -335,7 +336,8 @@ betas <- c(beta.lam,beta.v,beta.mu) #true parameters
 
 Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
 <<>>=
-num.patients <- 20  #again, recommend at least 100
+set.seed(100)
+num.patients <- 100  #recommend at least 100
 x1 <- runif(num.patients,0,2); x2 <- runif(num.patients,6,10) ; x3 <- runif(num.patients,4,6)  
 patients.design <- rbind(1, x1,x2,x3) 
 patients.rates <- MakePatientRates(patients.design, betas)
@@ -355,19 +357,20 @@ Finally, running the EM algorithm to recover the coefficients given data generat
 
 We note that the algorithm is numerically sensitive in the sense that initial guesses which are ill-suited for the corresponding dataset may lead to overflow/underflow in numerical computations. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. In our simulation studies included in paper, roughly half of the initial guesses fail, but our algorithm is robust in the sense that those that do converge result at the same solution. Similar issues may arise in black box optimization, but as we show in the paper, even using relatively robust standard optimization methods such as Nelder-Mead lead to a disparate range of results at convergence, which is highly undesirable.
 
-<<eval=FALSE, tidy=FALSE>>=
-gridLength = 32 #can set to 32 also
+<<eval=TRUE, tidy=FALSE>>=
+gridLength = 16 #can set to 32 for more accuracy
 s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 
-#perturb around true values for initial guess:
-betaInit <- as.vector(rmvnorm(1, mean = betas, sigma = diag(.1*abs(betas) )))
+#perturb around true values for initial guess; in practice increase variance:
+betaInit <- as.vector(rmvnorm(1, mean = betas, sigma = diag(.01*abs(betas) )))
 
-relTol = .0000001 #set relative convergence criteria
+relTol = .00001 #set relative convergence criteria, in practice use smaller
 
 #Run EM algorithm
 EMrun <- EM.run(betaInit, t.pat, num.patients, 
-                PATIENTDATA, patients.design, s1.seq, s2.seq, relTol)
+                PATIENTDATA, patients.design, s1.seq, s2.seq, relTol, verbose=FALSE)
+
 #post-hoc numerical confidence interval computation, a slow function
 #sigma <- getStandardErrors(EMrun$betaEstimate, t.pat, 
 #                           num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq)
@@ -376,11 +379,22 @@ EMrun <- EM.run(betaInit, t.pat, num.patients,
 @
 
 A comparison to standard optimization using \texttt{optim} can be run as shown below, with convergence criterion also equal \texttt{relTol}:
-<<eval=FALSE, tidy=FALSE>>=
+<<eval=TRUE, tidy=FALSE>>=
 ###Repeat using optim beginning from same initial guess, maxiter set to 2000
 #add hessian=TRUE if standard errors needed
 beta.optim <- FFT.pat.optim(betaInit, t.pat, num.patients, PATIENTDATA, 
-                            patients.design, s1.seq, s2.seq, relTol, 2000)  
+                            patients.design, s1.seq, s2.seq, relTol, max=2000, hess=FALSE )  
+@
+
+Finally, we can print and compare the estimates and likelihood values returned by each method:
+<<eval=TRUE, tidy=FALSE>>=
+EMrun$betaEstimate
+
+beta.optim$par
+
+EMrun$loglike
+
+beta.optim$value
 @
 
 \end{document}

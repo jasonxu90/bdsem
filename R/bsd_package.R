@@ -1319,9 +1319,9 @@ logFFT.patients <- function(betas, t.pat, num.patients, PATIENTDATA, patients.de
 #' @return An \code{optim} type object
 #optimizes the function logFFT.patients beginning with betaInit as initial guess
 #uses Nelder-Mead optimization in optim package
-FFT.pat.optim <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq, tol, max){
+FFT.pat.optim <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq, tol, max=2000, hess=TRUE){
   optim(betaInit, logFFT.patients, t.pat= t.pat, num.patients = num.patients, PATIENTDATA = PATIENTDATA, patients.design = patients.design, 
-        s1.seq = s1.seq, s2.seq = s2.seq, hessian=T, control = list(trace = 6, maxit = max, reltol = tol))
+        s1.seq = s1.seq, s2.seq = s2.seq, hessian=hess, control = list(maxit = max, reltol = tol))
 }
 
 
@@ -1500,8 +1500,9 @@ MSTEP <- function(matrix, betaVec, num.patients, patients.design){
 #' @param s1.seq A vector of complex arguments evenly spaced along the unit circle
 #' @param s2.seq A vector of complex arguments evenly spaced along the unit circle
 #' @param relTol A number, the relative convergence criterion
+#' 
 #' @return A list containing the log-likelihood value at convergence, the final beta estimate, and the number of iterations
-EM.run <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq, relTol){
+EM.run <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq, relTol, verbose=FALSE){
   llist <- c(999,99) #records log likelihoods, ignore these first two entries
   betacur <- bMat <- betaInit #betacur will keep track of initial estimate, bMat records all estimates
   mat <- mat.or.vec(4,num.patients) 
@@ -1510,7 +1511,7 @@ EM.run <- function(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, 
   while(abs(llist[iter]-llist[iter-1]) > relTol*abs(llist[iter])){
     ###E STEP
     mat <- ESTEP(betacur, t.pat, num.patients, PATIENTDATA, patients.design, s1.seq, s2.seq)
-    #print(betacur)
+    if(verbose){print(betacur)}
     ###M step
     #initialize betaold, a vector to store previous beta setting after each Newton-Raphson step
     betaold <- rep(99,length(betacur)); numMsteps = 0
