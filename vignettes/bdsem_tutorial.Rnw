@@ -76,7 +76,7 @@ These empirical transition probabilities via simulation serve as a ground truth 
 
 To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method via \texttt{getTrans.FreqMon}: %note this next section will take a while, even with a relatively small number of simulations
 <<>>=
-nSims = 200    # further increase number of simulations for more precise estimates
+nSims = 5   # further increase number of simulations for more precise estimates
 #nSims = 10      # for speed of compilation, should increase
 tp.MC <- getTrans.MC(nSims,tList, lam, v, mu, 10)
 tp.FM <- getTrans.FreqMon(tList, lam, v, mu, 10)
@@ -256,7 +256,7 @@ The code below recreates a similar, smaller scale version of Figure 2 in the app
 lam = 3*.0188; v = 3*.0026;  mu = 3*.0147 #increase rates here so there are not
 #too many realizations with zero events, which thus requires more MC simulations
 initNum = 10; param <- c(lam,v,mu)
-numSims = 200 #in practice, increase number of MC simulations
+numSims = 5 #in practice, increase number of MC simulations
 #numSims = 10    # to compile quickly; use at least 100
 tList <- c(.5,1,3,5)
 
@@ -337,7 +337,7 @@ betas <- c(beta.lam,beta.v,beta.mu) #true parameters
 Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
 <<>>=
 set.seed(100)
-num.patients <- 100  #recommend at least 100
+num.patients <- 20  #recommend at least 100 in practice
 x1 <- runif(num.patients,0,2); x2 <- runif(num.patients,6,10) ; x3 <- runif(num.patients,4,6)  
 patients.design <- rbind(1, x1,x2,x3) 
 patients.rates <- MakePatientRates(patients.design, betas)
@@ -357,7 +357,7 @@ Finally, running the EM algorithm to recover the coefficients given data generat
 
 We note that the algorithm is numerically sensitive in the sense that initial guesses which are ill-suited for the corresponding dataset may lead to overflow/underflow in numerical computations. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. In our simulation studies included in paper, roughly half of the initial guesses fail, but our algorithm is robust in the sense that those that do converge result at the same solution. Similar issues may arise in black box optimization, but as we show in the paper, even using relatively robust standard optimization methods such as Nelder-Mead lead to a disparate range of results at convergence, which is highly undesirable.
 
-<<eval=TRUE, tidy=FALSE>>=
+<<eval=FALSE, tidy=FALSE>>=
 gridLength = 16 #can set to 32 for more accuracy
 s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
@@ -365,7 +365,7 @@ s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 #perturb around true values for initial guess; in practice increase variance:
 betaInit <- as.vector(rmvnorm(1, mean = betas, sigma = diag(.01*abs(betas) )))
 
-relTol = .00001 #set relative convergence criteria, in practice use smaller
+relTol = .000001 #set relative convergence criteria, in practice use smaller
 
 #Run EM algorithm
 EMrun <- EM.run(betaInit, t.pat, num.patients, 
@@ -379,22 +379,21 @@ EMrun <- EM.run(betaInit, t.pat, num.patients,
 @
 
 A comparison to standard optimization using \texttt{optim} can be run as shown below, with convergence criterion also equal \texttt{relTol}:
-<<eval=TRUE, tidy=FALSE>>=
+<<eval=FALSE, tidy=FALSE>>=
 ###Repeat using optim beginning from same initial guess, maxiter set to 2000
 #add hessian=TRUE if standard errors needed
-beta.optim <- FFT.pat.optim(betaInit, t.pat, num.patients, PATIENTDATA, 
+optimRun <- FFT.pat.optim(betaInit, t.pat, num.patients, PATIENTDATA, 
                             patients.design, s1.seq, s2.seq, relTol, max=2000, hess=FALSE )  
 @
 
-Finally, we can print and compare the estimates and likelihood values returned by each method:
-<<eval=TRUE, tidy=FALSE>>=
+Finally, we can print and compare the converged estimates and log-likelihood values returned by each method. See Figure 4 in the main paper for results comparing EM and Optim over many trials.
+<<eval=FALSE, tidy=TRUE>>=
+#estimates:
 EMrun$betaEstimate
-
 beta.optim$par
-
+#log-likelihood at estimate:
 EMrun$loglike
-
-beta.optim$value
+-beta.optim$value
 @
 
 \end{document}

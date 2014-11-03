@@ -25,7 +25,7 @@
 #' de.trans(t,state,param)
 de.trans <- function(t, state, param){  
   with(as.list(c(state,param)), {    
-    C <- 1/(s2-1) + lam/(lam-mu)
+    C <- 1/(s2-1+.Machine$double.eps) + lam/(lam-mu)
     f <- 1 + 1/(lam/(mu-lam) + C*exp((mu-lam)*t))
     dG <- G*(lam*f - lam - v - mu) + v*f + mu
     #return rates of change
@@ -51,7 +51,7 @@ de.trans <- function(t, state, param){
 #' de.shift(t,state,param)
 de.shift <- function(t, state, param){  
   with(as.list(c(state,param)), {    
-    C <- 1/(s2-1) + lam/(lam-mu)
+    C <- 1/(s2-1+.Machine$double.eps) + lam/(lam-mu)
     f <- 1 + 1/(lam/(mu-lam) + C*exp((mu-lam)*t))
     dG <- G*(lam*f - lam - v - mu) + v*r*f + mu
     #return rates of change
@@ -152,7 +152,7 @@ de.particleT <- function(t, state, param){
 #' @param mu Death rate
 #' @return The function value of the transition probability generating function 
 #' @examples 
-#' time = 5;  dt = 1; s1 = exp(2*1i); s2 = exp(3*1i); lam = .5; v = .2; mu = .4
+#' time = 5;  dt = 5; s1 = exp(2*1i); s2 = exp(3*1i); lam = .5; v = .2; mu = .4
 #' solve.trans(time,dt,s1,s2,lam,v,mu)
 solve.trans <- function(time, dt, s1, s2, lam,v,mu){
   t <- seq(0, time, by=dt)
