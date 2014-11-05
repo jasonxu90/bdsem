@@ -25,7 +25,7 @@
 #' de.trans(t,state,param)
 de.trans <- function(t, state, param){  
   with(as.list(c(state,param)), {    
-    C <- 1/(s2-1+.Machine$double.eps) + lam/(lam-mu)
+    C <- 1/(s2-1+.5*.Machine$double.eps) + lam/(lam-mu)
     f <- 1 + 1/(lam/(mu-lam) + C*exp((mu-lam)*t))
     dG <- G*(lam*f - lam - v - mu) + v*f + mu
     #return rates of change
@@ -51,7 +51,7 @@ de.trans <- function(t, state, param){
 #' de.shift(t,state,param)
 de.shift <- function(t, state, param){  
   with(as.list(c(state,param)), {    
-    C <- 1/(s2-1+.Machine$double.eps) + lam/(lam-mu)
+    C <- 1/(s2-1+.5*.Machine$double.eps) + lam/(lam-mu)
     f <- 1 + 1/(lam/(mu-lam) + C*exp((mu-lam)*t))
     dG <- G*(lam*f - lam - v - mu) + v*r*f + mu
     #return rates of change
@@ -74,7 +74,7 @@ de.shift <- function(t, state, param){
 #' de.birth(t,state,param)
 de.birth <- function(t, state, param){
   with(as.list(c(state,param)), {    
-    yb <- (lam + mu + sqrt(lam^2 + 2*lam*mu + mu^2 - 4*lam*mu*r)) / (2*lam*r)
+    yb <- (lam + mu + sqrt(lam^2 + 2*lam*mu + mu^2 - 4*lam*mu*r + .5*.Machine$double.eps)) / (2*lam*r)
     C <- 1/(s2-yb) + lam*r/(2*lam*r*yb - lam - mu)
     f <- yb + 1/( -lam*r/(2*lam*r*yb - lam - mu) + C*exp(-(2*yb*lam*r - lam - mu)*t) )
     dG <- G*(lam*r*f - lam - v - mu) + v*f + mu
@@ -98,7 +98,7 @@ de.birth <- function(t, state, param){
 #' de.death(t,state,param)
 de.death <- function(t, state, param){
   with(as.list(c(state,param)), {    
-    yd <- (lam + mu + sqrt(lam^2 + 2*lam*mu + mu^2 - 4*lam*mu*r)) / (2*lam)
+    yd <- (lam + mu + sqrt(lam^2 + 2*lam*mu + mu^2 - 4*lam*mu*r + .5*.Machine$double.eps)) / (2*lam)
     C <- 1/(s2-yd) + lam/(2*lam*yd - lam - mu)
     f <- yd + 1/( -lam/(2*lam*yd - lam - mu) + C*exp(-(2*yd*lam - lam - mu)*t) )
     dG <- G*(lam*f - lam - v - mu) + v*f + mu*r
@@ -122,8 +122,8 @@ de.death <- function(t, state, param){
 #' de.particleT(t,state,param)
 de.particleT <- function(t, state, param){
   with(as.list(c(state,param)), {    
-    y <- (lam + mu + r +sqrt( (lam + mu + r)^2 - 4*lam*mu)) / (2*lam)
-    C <- 1/(s2-y) + lam/(2*lam*y - lam - mu - r)
+    y <- (lam + mu + r +sqrt( (lam + mu + r)^2 - 4*lam*mu + .5*.Machine$double.eps)) / (2*lam)
+    C <- 1/(s2-y+.Machine$double.eps) + lam/(2*lam*y - lam - mu - r)
     f <- y + 1/( -lam/(2*lam*y - lam - mu - r) + C*exp(-(2*y*lam - lam - mu - r)*t) )
     dG <- G*(lam*f - lam - v - mu - r) + v*f + mu
     #return rates of change
@@ -318,7 +318,7 @@ makeGrid.shift.r1 <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- solve.shift(time, dt, s1.seq[i], s2.seq[j], 1, lam,v,mu) #put the result in the matrix
+      result[i,j] <- solve.shift(time, dt, s1.seq[i], s2.seq[j], 1.0, lam,v,mu) #put the result in the matrix
     }
   }
   return(result)
@@ -347,7 +347,7 @@ makeGrid.birth.r1 <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- solve.birth(time, dt, s1.seq[i], s2.seq[j], 1, lam,v,mu) #put the result in the matrix
+      result[i,j] <- solve.birth(time, dt, s1.seq[i], s2.seq[j], 1.0, lam,v,mu) #put the result in the matrix
     }
   }
   return(result)
@@ -376,7 +376,7 @@ makeGrid.death.r1 <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- solve.death(time, dt, s1.seq[i], s2.seq[j], 1, lam,v,mu) #put the result in the matrix
+      result[i,j] <- solve.death(time, dt, s1.seq[i], s2.seq[j], 1.0, lam,v,mu) #put the result in the matrix
     }
   }
   return(result)
@@ -405,7 +405,7 @@ makeGrid.particleT.r0 <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- solve.particleT(time, dt, s1.seq[i], s2.seq[j], 0, lam,v,mu) #put the result in the matrix
+      result[i,j] <- solve.particleT(time, dt, s1.seq[i], s2.seq[j], 0.0, lam,v,mu) #put the result in the matrix
     }
   }
   return(result)
@@ -435,7 +435,7 @@ makeGrid.shift.partial <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- grad(solve.shift, 1, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
+      result[i,j] <- grad(solve.shift, 1.0, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
     }
   }
   return(result)
@@ -465,7 +465,7 @@ makeGrid.birth.partial <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- grad(solve.birth, 1, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
+      result[i,j] <- grad(solve.birth, 1.0, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
     }
   }
   return(result)
@@ -495,7 +495,7 @@ makeGrid.death.partial <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- grad(solve.death, 1, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
+      result[i,j] <- grad(solve.death, 1.0, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
     }
   }
   return(result)
@@ -525,7 +525,7 @@ makeGrid.particleT.partial <- function(time, dt, s1.seq, s2.seq, lam, v, mu){
   result <- matrix(nrow = length(s1.seq), ncol = length(s2.seq)) #this will store the grid
   for(i in 1:length(s1.seq)){
     for(j in 1:length(s2.seq)){    
-      result[i,j] <- grad(solve.particleT, 0, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
+      result[i,j] <- grad(solve.particleT, 0.0, time = time, dt = dt, s1 = s1.seq[i], s2 = s2.seq[j], lam = lam, v = v, mu=mu, method = "simple")
     }
   }
   return(result)
