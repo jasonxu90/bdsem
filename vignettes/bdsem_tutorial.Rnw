@@ -75,7 +75,7 @@ These empirical transition probabilities via simulation serve as a ground truth 
 
 To compare with previous methods, we can also compute the probabilities of one birth, death, or shift, as well as the probability of no event occurring, according to the frequent monitoring method via \texttt{getTrans.FreqMon}: %note this next section will take a while, even with a relatively small number of simulations
 <<>>=
-nSims = 100   # further increase number of simulations for more precise estimates
+nSims = 200   # further increase number of simulations for more precise estimates
 #nSims = 10      # for speed of compilation, should increase
 tp.MC <- getTrans.MC(nSims,tList, lam, v, mu, 10)
 tp.FM <- getTrans.FreqMon(tList, lam, v, mu, 10)
@@ -255,7 +255,7 @@ The code below recreates a similar, smaller scale version of Figure 2 in the app
 lam = 3*.0188; v = 3*.0026;  mu = 3*.0147 #increase rates here so there are not
 #too many realizations with zero events, which thus requires more MC simulations
 initNum = 10; param <- c(lam,v,mu)
-numSims = 100 #in practice, increase number of MC simulations
+numSims = 200 #in practice, increase number of MC simulations
 #numSims = 10    # to compile quickly; use at least 100
 tList <- c(.5,1,3,5)
 
@@ -325,18 +325,18 @@ We conclude this vignette with a tutorial on using our software for recovering t
   \end{equation}
 where  $\boldsymbol\beta := (\boldsymbol\beta^\lambda,  \boldsymbol\beta^\nu,  \boldsymbol\beta^\mu)$ are the regression coefficients and $\cdot$ represents a vector product. Note that inference for the simple BDS process that we studied using general optimization is possible by setting $\mb{z}_p$ to be only a vector of 1's, and $\boldsymbol\beta = \lambda, \nu, \mu$.
 
-Following the simulation study in section 3.2 of the paper, we begin by specifying the true coefficient vector with 4 coefficients per rate:
+Following the simulation study in section 3.2 of the paper, we begin by specifying the true coefficient vector, here with 2 coefficients per rate rather than 4:
 <<>>=
-beta.lam <- c(log(7.5), log(.5), log(.3), log(3))
-beta.v <- c( log(2), log(8), log(.5), log(.9))
-beta.mu <- c(log(5), log(.8), log(.8), log(.7))
-betas <- c(beta.lam,beta.v,beta.mu) #true parameters
-
-
 beta.lam <- c(log(.3), log(.8))
 beta.v <- c( log(.1), log(.9))
 beta.mu <- c(log(.5), log(.6))
-betas <- c(beta.lam,beta.v,beta.mu)
+betas <- c(beta.lam,beta.v,beta.mu) #true parameters
+
+#rates from paper:
+# beta.lam <- c(log(7.5), log(.5), log(.3), log(3))
+# beta.v <- c( log(2), log(8), log(.5), log(.9))
+# beta.mu <- c(log(5), log(.8), log(.8), log(.7))
+# betas <- c(beta.lam,beta.v,beta.mu) 
 @
 
 Next, we generate vectors of patient covariates uniformly according to the code below, and create a matrix containing the individual rates using \texttt{MakePatientRates}: rows correspond to the birth, shift, and death rates, with columns corresponding to individual patients.
@@ -363,7 +363,7 @@ Finally, running the EM algorithm to recover the coefficients given data generat
 We note that the algorithm is numerically sensitive in the sense that initial guesses which are ill-suited for the corresponding dataset may lead to overflow/underflow in numerical computations. Similarly, intermediate steps may generate warning messages from methods in \texttt{deSolve}. In our simulation studies included in paper, roughly half of the initial guesses fail, but our algorithm is robust in the sense that those that do converge result at the same solution. Similar issues may arise in black box optimization, but as we show in the paper, even using relatively robust standard optimization methods such as Nelder-Mead lead to a disparate range of results at convergence, which is highly undesirable.
 
 <<eval=TRUE, tidy=FALSE>>=
-gridLength = 16 #can set to 32, etc, for more accuracy
+gridLength = 16 #set to 32 or higher for more accuracy
 s1.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 
@@ -371,7 +371,7 @@ s2.seq <- exp(2*pi*1i*seq(from = 0, to = (gridLength-1))/gridLength)
 betaInit <- betas
 # can also perturb around true value, i.e. as.vector(rmvnorm(1, mean = betas, sigma = diag(.1*abs(betas) )))
 
-relTol = .00001 #set relative convergence criteria, in practice use smaller
+relTol = .00001 #set relative convergence criteria, in practice use smaller relTol
 
 #Run EM algorithm
 EMrun <- EM.run(betaInit, t.pat, num.patients, 
@@ -386,20 +386,20 @@ EMrun <- EM.run(betaInit, t.pat, num.patients,
 
 A comparison to standard optimization using \texttt{optim} can be performed as shown below, with convergence criterion also equal \texttt{relTol}:
 <<eval=TRUE, tidy=FALSE>>=
-###Repeat using optim beginning from same initial guess, maxiter set to 2000
-#add hessian=TRUE if standard errors needed
-optimRun <- FFT.pat.optim(betaInit, t.pat, num.patients, PATIENTDATA, 
-                            patients.design, s1.seq, s2.seq, relTol, max=2000, hess=FALSE)  
+# Repeat using optim beginning from same initial guess, maxiter set to 2000
+# add hessian=TRUE if standard errors needed
+optimRun <- FFT.pat.optim(betaInit, t.pat, num.patients, PATIENTDATA, patients.design, 
+                          s1.seq, s2.seq, relTol, max=2000, hess=FALSE)  
 @
 
 Finally, we can print and compare the converged estimates and log-likelihood values returned by each method. See Figure 4 in the main paper for results comparing estimates, log likelihood values, and timing results between EM and \texttt{optim} over many trials.
 <<eval=TRUE, tidy=TRUE>>=
 #estimates:
 EMrun$betaEstimate
-beta.optim$par
+optimRun$par
 #log-likelihood at estimate:
 EMrun$loglike
--beta.optim$value
+-optimRun$value
 @
 
 \end{document}
